@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Trppl">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/favicon.png">
+<title>Verify Code — Trppl</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/auth.css">
+<style>
+.otp-wrap { display: flex; gap: 10px; justify-content: center; margin: 28px 0 8px; }
+.otp-digit {
+  width: 48px; height: 60px; border-radius: var(--rad);
+  border: 2px solid var(--br2); background: var(--bg2);
+  font-size: 28px; font-weight: 700; text-align: center;
+  color: var(--tx); font-family: var(--font);
+  caret-color: var(--p); outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  -webkit-appearance: none;
+}
+.otp-digit:focus { border-color: var(--p); box-shadow: 0 0 0 3px rgba(124,58,237,.15); }
+.otp-digit.filled { border-color: var(--p); background: var(--pl); color: var(--pd); }
+.otp-digit.error  { border-color: var(--r); background: #fee2e2; color: var(--r); }
+.countdown { font-size: 13px; color: var(--tx3); text-align: center; margin-top: 8px; }
+.countdown span { color: var(--p); font-weight: 600; }
+.method-icon { font-size: 52px; text-align: center; margin: 16px 0 8px; }
+</style>
+</head>
+<body>
+<div class="phone auth-phone">
+  <div class="auth-header">
+    <div class="nav-brand">TRPPL</div>
+    <div class="nav-tagline">verify your account</div>
+  </div>
+
+  <div class="auth-body" style="text-align:center">
+    <div class="method-icon" id="methodIcon">📧</div>
+    <h1 class="auth-title">Enter your code</h1>
+    <p class="auth-sub" id="otpSub">We sent a 6-digit code to your email address. Enter it below to verify your account.</p>
+
+    <div id="formError" class="auth-error" hidden></div>
+    <div id="formSuccess" class="auth-success" hidden></div>
+
+    <!-- 6 digit OTP inputs -->
+    <div class="otp-wrap">
+      <input class="otp-digit" id="d0" type="number" min="0" max="9" maxlength="1" inputmode="numeric" autocomplete="one-time-code">
+      <input class="otp-digit" id="d1" type="number" min="0" max="9" maxlength="1" inputmode="numeric">
+      <input class="otp-digit" id="d2" type="number" min="0" max="9" maxlength="1" inputmode="numeric">
+      <input class="otp-digit" id="d3" type="number" min="0" max="9" maxlength="1" inputmode="numeric">
+      <input class="otp-digit" id="d4" type="number" min="0" max="9" maxlength="1" inputmode="numeric">
+      <input class="otp-digit" id="d5" type="number" min="0" max="9" maxlength="1" inputmode="numeric">
+    </div>
+
+    <div class="countdown" id="countdown">Code expires in <span id="countdownVal">10:00</span></div>
+
+    <button class="auth-btn" id="verifyBtn" onclick="verifyCode()" style="margin-top:20px">
+      <span id="verifyLabel">Verify code</span>
+      <span id="verifySpinner" class="spinner" hidden></span>
+    </button>
+
+    <button class="auth-btn auth-btn-outline" id="resendBtn" onclick="resendCode()" style="margin-top:10px">
+      <span id="resendLabel">Resend code</span>
+      <span id="resendSpinner" class="spinner" hidden></span>
+    </button>
+
+    <div class="auth-divider"><a href="/pages/register.html" class="auth-link">← Back to registration</a></div>
+  </div>
+</div>
+
+<script src="/js/auth.js"></script>
+<script src="/js/sw-register.js"></script>
+<script>
+(function () {
+  const contact = sessionStorage.getItem('otp_contact')  || '';
+  const method  = sessionStorage.getItem('otp_method')   || 'email';
+  const purpose = sessionStorage.getItem('otp_purpose')  || 'register';
+  const masked  = sessionStorage.getItem('otp_masked')   || contact;
+
+  // Update UI based on method
+  document.getElementById('methodIcon').textContent = method === 'phone' ? '📱' : '📧';
+  document.getElementById('otpSub').textContent =
+    method === 'phone'
+      ? `We sent a 6-digit code to ${masked}. Enter it below to verify your account.`
+      : `We sent a 6-digit code to ${masked}. Enter it below to verify your account.`;
+
+  // ── OTP input behaviour ───────────────────────────────────────────────────
+  const digits = Array.from({ length: 6 }, (_, i) => document.getElementById('d' + i));
+
+  digits.forEach((inp, i) => {
+    inp.addEventListener('input', (e) => {
+      // Only keep single digit
+      const val = e.target.value.replace(/\D/g, '').slice(-1);
+      e.target.value = val;
+      if (val) {
+        inp.classList.add('filled');
+        inp.classList.remove('error');
+        if (i < 5) digits[i + 1].focus();
+        else autoSubmit();
+      } else {
+        inp.classList.remove('filled');
+      }
+    });
+
+    inp.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !inp.value && i > 0) {
+        digits[i - 1].value = '';
+        digits[i - 1].classList.remove('filled');
+        digits[i - 1].focus();
+      }
+      // Block non-numeric
+      if (!/^\d$/.test(e.key) && !['Backspace','Tab','ArrowLeft','ArrowRight','Delete'].includes(e.key)) {
+        e.preventDefault();
+      }
+    });
+
+    inp.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+      pasted.split('').forEach((ch, idx) => {
+        if (idx < 6) {
+          digits[idx].value = ch;
+          digits[idx].classList.add('filled');
+        }
+      });
+      if (pasted.length === 6) autoSubmit();
+      else digits[Math.min(pasted.length, 5)].focus();
+    });
+  });
+
+  digits[0].focus();
+
+  function getCode() { return digits.map(d => d.value).join(''); }
+
+  function setDigitError() { digits.forEach(d => { d.classList.add('error'); d.classList.remove('filled'); }); }
+  function clearDigitError() { digits.forEach(d => d.classList.remove('error')); }
+
+  function autoSubmit() {
+    const code = getCode();
+    if (code.length === 6) verifyCode();
+  }
+
+  // ── Countdown timer ───────────────────────────────────────────────────────
+  let secs = 10 * 60;
+  let resendCooldown = 60;
+  const countdownEl = document.getElementById('countdownVal');
+
+  const countdownInt = setInterval(() => {
+    secs--;
+    if (secs <= 0) {
+      clearInterval(countdownInt);
+      document.getElementById('countdown').textContent = 'Code has expired. Please request a new one.';
+      document.getElementById('verifyBtn').disabled = true;
+    } else {
+      const m = Math.floor(secs / 60);
+      const s = secs % 60;
+      countdownEl.textContent = `${m}:${String(s).padStart(2, '0')}`;
+    }
+  }, 1000);
+
+  // Resend cooldown
+  let resendInt = null;
+  function startResendCooldown() {
+    resendCooldown = 60;
+    document.getElementById('resendBtn').disabled = true;
+    document.getElementById('resendLabel').textContent = `Resend in ${resendCooldown}s`;
+    resendInt = setInterval(() => {
+      resendCooldown--;
+      document.getElementById('resendLabel').textContent = resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend code';
+      if (resendCooldown <= 0) {
+        clearInterval(resendInt);
+        document.getElementById('resendBtn').disabled = false;
+      }
+    }, 1000);
+  }
+
+  // ── Verify ────────────────────────────────────────────────────────────────
+  window.verifyCode = async function() {
+    const code = getCode();
+    if (code.length < 6) {
+      showError('Please enter all 6 digits.');
+      digits[code.length] && digits[code.length].focus();
+      return;
+    }
+
+    setLoading('verify', true);
+    clearError();
+
+    try {
+      const data = await Auth.verifyOtp({ contact, code, purpose });
+
+      clearInterval(countdownInt);
+      showSuccess('✅ ' + (data.message || 'Verified! Redirecting…'));
+
+      setTimeout(() => {
+        // After registration, go to identity verification
+        // After login OTP, go to app
+        if (purpose === 'register') {
+          window.location.href = '/pages/verify-profile.html';
+        } else {
+          window.location.href = '/';
+        }
+      }, 1200);
+    } catch (err) {
+      setDigitError();
+      showError(err.message || 'Incorrect code. Please try again.');
+      setLoading('verify', false);
+    }
+  };
+
+  // ── Resend ────────────────────────────────────────────────────────────────
+  window.resendCode = async function() {
+    setLoading('resend', true);
+    clearError();
+    try {
+      await Auth.resendOtp({ contact, purpose });
+      showSuccess('New code sent! Check your ' + (method === 'phone' ? 'phone' : 'email') + '.');
+      secs = 10 * 60; // reset countdown
+      startResendCooldown();
+      digits.forEach(d => { d.value = ''; d.classList.remove('filled','error'); });
+      digits[0].focus();
+    } catch (err) {
+      showError(err.message || 'Could not resend. Please try again.');
+    } finally {
+      setLoading('resend', false);
+    }
+  };
+
+  function showError(msg) {
+    const e = document.getElementById('formError');
+    e.textContent = msg; e.hidden = false;
+    document.getElementById('formSuccess').hidden = true;
+  }
+  function showSuccess(msg) {
+    const e = document.getElementById('formSuccess');
+    e.textContent = msg; e.hidden = false;
+    document.getElementById('formError').hidden = true;
+  }
+  function clearError() {
+    document.getElementById('formError').hidden = true;
+    document.getElementById('formSuccess').hidden = true;
+    clearDigitError();
+  }
+  function setLoading(btn, on) {
+    document.getElementById(btn + 'Btn').disabled = on;
+    document.getElementById(btn + 'Label').hidden  = on;
+    document.getElementById(btn + 'Spinner').hidden = !on;
+  }
+
+  startResendCooldown();
+})();
+</script>
+</body>
+</html>

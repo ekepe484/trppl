@@ -1,0 +1,69 @@
+/* ── AUTH SHELL ─────────────────────────────────────────────────────────────── */
+.auth-phone { min-height: 100vh; background: var(--bg); display: flex; flex-direction: column; }
+.auth-header { background: #1a1a2e; padding: 28px 24px 20px; text-align: center; }
+.auth-body { flex: 1; padding: 28px 24px 40px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.auth-title { font-size: 24px; font-weight: 700; color: var(--tx); margin-bottom: 6px; }
+.auth-sub { font-size: 14px; color: var(--tx2); margin-bottom: 24px; line-height: 1.5; }
+
+/* ── FIELDS ─────────────────────────────────────────────────────────────────── */
+.field { margin-bottom: 16px; }
+.field-label { display: block; font-size: 13px; font-weight: 600; color: var(--tx); margin-bottom: 6px; }
+.field-wrap { position: relative; display: flex; align-items: center; }
+.field-icon { position: absolute; left: 12px; font-size: 17px; color: var(--tx3); pointer-events: none; }
+.field-input {
+  width: 100%; padding: 13px 42px 13px 38px; border-radius: var(--rad);
+  border: 1px solid var(--br2); background: var(--bg2); font-size: 15px;
+  color: var(--tx); font-family: var(--font); transition: border-color .15s, box-shadow .15s;
+  -webkit-appearance: none;
+}
+.field-input:focus { outline: none; border-color: var(--p); box-shadow: 0 0 0 3px rgba(124,58,237,.12); }
+.field-input::placeholder { color: var(--tx3); }
+.field-toggle { position: absolute; right: 10px; background: transparent; border: none; color: var(--tx3); font-size: 18px; padding: 4px; cursor: pointer; }
+.field-error { font-size: 12px; color: var(--r); margin-top: 5px; min-height: 16px; }
+.field-hint  { font-size: 11px; color: var(--tx3); margin-top: 4px; padding: 0 2px; }
+.field-status { position: absolute; right: 12px; font-size: 14px; }
+
+/* ── CHECKBOX ───────────────────────────────────────────────────────────────── */
+.field-terms { margin-bottom: 20px; }
+.checkbox-label { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--tx2); cursor: pointer; line-height: 1.5; }
+.checkbox-label input[type="checkbox"] { flex-shrink: 0; width: 18px; height: 18px; margin-top: 2px; accent-color: var(--p); }
+
+/* ── BUTTONS ────────────────────────────────────────────────────────────────── */
+.auth-btn {
+  width: 100%; padding: 15px; border-radius: var(--rad); border: none;
+  background: var(--p); color: #fff; font-size: 16px; font-weight: 700;
+  font-family: var(--font); cursor: pointer; display: flex; align-items: center;
+  justify-content: center; gap: 8px; transition: opacity .15s, transform .1s;
+  text-decoration: none; margin-top: 8px;
+}
+.auth-btn:active:not(:disabled) { transform: scale(.98); opacity: .9; }
+.auth-btn:disabled { opacity: .5; cursor: not-allowed; }
+.auth-btn-outline { background: transparent; border: 2px solid var(--p); color: var(--p); }
+.auth-btn-red { background: var(--r); }
+
+/* ── FEEDBACK ───────────────────────────────────────────────────────────────── */
+.auth-error   { background: #fee2e2; border: 1px solid #fca5a5; border-radius: var(--rads); padding: 12px 14px; font-size: 13px; color: #991b1b; margin-bottom: 16px; line-height: 1.45; }
+.auth-success { background: #dcfce7; border: 1px solid #86efac; border-radius: var(--rads); padding: 12px 14px; font-size: 13px; color: #166534; margin-bottom: 16px; line-height: 1.45; }
+@media(prefers-color-scheme:dark){
+  .auth-error   { background: #450a0a; border-color: #7f1d1d; color: #fca5a5; }
+  .auth-success { background: #052e16; border-color: #166534; color: #86efac; }
+}
+
+/* ── DIVIDER / LINKS ────────────────────────────────────────────────────────── */
+.auth-divider { text-align: center; font-size: 14px; color: var(--tx2); margin-top: 20px; }
+.auth-link { color: var(--p); text-decoration: none; font-weight: 600; }
+.auth-link:hover { text-decoration: underline; }
+
+/* ── SPINNER ────────────────────────────────────────────────────────────────── */
+.spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; display: inline-block; flex-shrink: 0; }
+.spinner-lg { width: 40px; height: 40px; border-width: 3px; border-color: var(--pl); border-top-color: var(--p); }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── BTN ROW ────────────────────────────────────────────────────────────────── */
+.btn-row { display: flex; gap: 10px; }
+.btn-row .auth-btn { flex: 1; }
+
+/* ── CONTACT TOGGLE ─────────────────────────────────────────────────────────── */
+.contact-toggle { display: flex; gap: 10px; margin-bottom: 20px; }
+.ctog { flex: 1; padding: 12px; border-radius: var(--rad); border: 2px solid var(--br2); background: var(--bg2); color: var(--tx2); font-size: 14px; font-weight: 600; font-family: var(--font); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all .15s; }
+.ctog.active { background: var(--pl); border-color: var(--p); color: var(--p); }

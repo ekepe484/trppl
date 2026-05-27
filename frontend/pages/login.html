@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Trppl">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/favicon.png">
+<title>Sign In — Trppl</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/auth.css">
+<link rel="stylesheet" href="/css/register.css">
+</head>
+<body>
+<div class="phone auth-phone">
+  <div class="auth-header">
+    <div class="nav-brand">TRPPL</div>
+    <div class="nav-tagline">match · compete · date</div>
+  </div>
+
+  <div class="auth-body">
+    <h1 class="auth-title">Welcome back</h1>
+    <p class="auth-sub">Sign in with your email or phone number.</p>
+
+    <div id="formError" class="auth-error" hidden></div>
+
+    <div class="contact-toggle" style="margin-bottom:20px">
+      <button class="ctog active" id="ltog-email" onclick="setMode('email')"><i class="ti ti-mail"></i> Email</button>
+      <button class="ctog" id="ltog-phone" onclick="setMode('phone')"><i class="ti ti-phone"></i> Phone</button>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="contact" id="contactLabel">Email address</label>
+      <div class="field-wrap">
+        <i class="ti ti-mail field-icon" id="contactIcon"></i>
+        <input class="field-input" id="contact" type="email" placeholder="you@example.com" autocomplete="email">
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="password">Password</label>
+      <div class="field-wrap">
+        <i class="ti ti-lock field-icon"></i>
+        <input class="field-input" id="password" type="password" placeholder="Your password" autocomplete="current-password">
+        <button type="button" class="field-toggle" onclick="togglePw()"><i class="ti ti-eye" id="pwIcon"></i></button>
+      </div>
+    </div>
+
+    <button class="auth-btn" id="loginBtn" onclick="doLogin()">
+      <span id="loginLabel">Sign in</span>
+      <span id="loginSpinner" class="spinner" hidden></span>
+    </button>
+
+    <div class="auth-divider">Don't have an account? <a href="/pages/register.html" class="auth-link">Register</a></div>
+  </div>
+</div>
+
+<script src="/js/auth.js"></script>
+<script src="/js/sw-register.js"></script>
+<script>
+(function () {
+  if (Auth.getToken()) window.location.href = '/';
+
+  let loginMode = 'email';
+
+  window.setMode = function(mode) {
+    loginMode = mode;
+    document.getElementById('ltog-email').classList.toggle('active', mode === 'email');
+    document.getElementById('ltog-phone').classList.toggle('active', mode === 'phone');
+    const inp  = document.getElementById('contact');
+    const lbl  = document.getElementById('contactLabel');
+    const icon = document.getElementById('contactIcon');
+    if (mode === 'email') {
+      inp.type = 'email'; inp.placeholder = 'you@example.com'; inp.autocomplete = 'email';
+      lbl.textContent = 'Email address'; icon.className = 'ti ti-mail field-icon';
+    } else {
+      inp.type = 'tel'; inp.placeholder = '+44 7700 900000'; inp.autocomplete = 'tel';
+      lbl.textContent = 'Phone number'; icon.className = 'ti ti-phone field-icon';
+    }
+    inp.value = '';
+  };
+
+  window.togglePw = function() {
+    const inp = document.getElementById('password');
+    const ico = document.getElementById('pwIcon');
+    inp.type  = inp.type === 'password' ? 'text' : 'password';
+    ico.className = inp.type === 'password' ? 'ti ti-eye' : 'ti ti-eye-off';
+  };
+
+  window.doLogin = async function() {
+    const contact  = document.getElementById('contact').value.trim();
+    const password = document.getElementById('password').value;
+    const fe = document.getElementById('formError');
+    fe.hidden = true;
+
+    if (!contact || !password) { fe.textContent = 'Please enter your credentials.'; fe.hidden = false; return; }
+
+    setLoading(true);
+    try {
+      const data = await Auth.login({ contact, password });
+
+      // Route based on verification state
+      if (!data.user.emailVerified && !data.user.phoneVerified) {
+        const method = data.user.contactMethod || 'email';
+        sessionStorage.setItem('otp_contact', method === 'email' ? data.user.email : data.user.phone);
+        sessionStorage.setItem('otp_method',  method);
+        sessionStorage.setItem('otp_purpose', 'register');
+        sessionStorage.setItem('otp_masked',  method === 'email' ? data.user.email : data.user.phone);
+        window.location.href = '/pages/verify-otp.html';
+        return;
+      }
+      if (!data.user.profileVerified && data.user.verificationStatus !== 'processing' && data.user.verificationStatus !== 'pending') {
+        window.location.href = '/pages/verify-profile.html';
+        return;
+      }
+      window.location.href = '/';
+    } catch (err) {
+      fe.textContent = err.message || 'Invalid credentials.'; fe.hidden = false;
+      setLoading(false);
+    }
+  };
+
+  function setLoading(on) {
+    document.getElementById('loginBtn').disabled = on;
+    document.getElementById('loginLabel').hidden  = on;
+    document.getElementById('loginSpinner').hidden = !on;
+  }
+
+  // Allow Enter key
+  document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+})();
+</script>
+</body>
+</html>

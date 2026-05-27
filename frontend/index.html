@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="description" content="Trppl — match on love language, compete in games, win the date.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Trppl">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
+<meta name="msapplication-TileColor" content="#1a1a2e">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/favicon.png">
+<title>Trppl</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/components.css">
+<link rel="stylesheet" href="/css/games.css">
+<link rel="stylesheet" href="/css/verification.css">
+</head>
+<body>
+<div class="phone">
+  <div class="sbar"><span id="clk">9:41</span><span><i class="ti ti-wifi"></i>&nbsp;<i class="ti ti-battery"></i></span></div>
+  <div class="nav">
+    <div><div class="nav-brand">TRPPL</div><div class="nav-tagline">match · compete · date</div></div>
+    <div class="nav-avatar" id="navAvatar">A</div>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button class="tab active" onclick="showTab('discover',this)" role="tab"><i class="ti ti-flame"></i>Discover</button>
+    <button class="tab" onclick="showTab('notifs',this)" role="tab"><i class="ti ti-bell"></i>Alerts</button>
+    <button class="tab" onclick="showTab('trppl',this)" role="tab"><i class="ti ti-users"></i>Trppl</button>
+    <button class="tab" onclick="showTab('games',this)" role="tab"><i class="ti ti-chess"></i>Games</button>
+    <button class="tab" onclick="showTab('waiting',this)" role="tab"><i class="ti ti-clock"></i>Waiting</button>
+  </nav>
+
+  <!-- DISCOVER -->
+  <section id="discover" class="screen active" role="tabpanel">
+    <div class="slabel">Love language quiz</div>
+    <div class="qcard">
+      <div class="pdots"><div class="pdot done"></div><div class="pdot done"></div><div class="pdot done"></div><div class="pdot done"></div><div class="pdot"></div></div>
+      <p class="quiz-q">Which means the most to you in a relationship?</p>
+      <div class="quiz-opts">
+        <button class="qopt sel" data-ll="Words of Affirmation" onclick="pickOpt(this)">💬 Words of Affirmation<span class="ll-desc">Compliments, "I love you", encouragement</span></button>
+        <button class="qopt" data-ll="Acts of Service" onclick="pickOpt(this)">🛠 Acts of Service<span class="ll-desc">Helping out, doing things without being asked</span></button>
+        <button class="qopt" data-ll="Receiving Gifts" onclick="pickOpt(this)">🎁 Receiving Gifts<span class="ll-desc">Thoughtful presents, tokens of affection</span></button>
+        <button class="qopt" data-ll="Quality Time" onclick="pickOpt(this)">🕐 Quality Time<span class="ll-desc">Undivided attention, being truly present</span></button>
+        <button class="qopt" data-ll="Physical Touch" onclick="pickOpt(this)">🤗 Physical Touch<span class="ll-desc">Hugs, hand-holding, physical closeness</span></button>
+      </div>
+    </div>
+    <div class="slabel">Your best match today</div>
+    <div class="pcard">
+      <div class="pimg"><div class="pav" id="pav" style="background:#7c3aed">S</div><div class="cbadge" id="pcomp">❤ 94% compatible</div></div>
+      <div class="pinfo">
+        <h2 class="pname" id="pname">Sophie, 27</h2>
+        <p class="pmeta"><i class="ti ti-map-pin"></i> <span id="pdist">3 miles away · Manchester</span></p>
+        <div class="llpills" id="pll"><span class="llpill">Words of affirmation</span><span class="llpill">Quality time</span></div>
+        <div class="arow">
+          <button class="bpass" onclick="passP()"><i class="ti ti-x"></i> Pass</button>
+          <button class="bmatch" onclick="matchP()"><i class="ti ti-heart"></i> Match</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NOTIFICATIONS -->
+  <section id="notifs" class="screen" role="tabpanel">
+    <div class="slabel">Notifications</div>
+    <div class="card">
+      <div class="notif"><div class="nic nim"><i class="ti ti-sparkles"></i></div><div><div class="ntitle">You have a unique match!</div><div class="nbody">You and Sophie share the same primary love language. You're connected!</div><div class="ntime">2 min ago</div></div></div>
+      <div class="notif"><div class="nic nio"><i class="ti ti-sword"></i></div><div><div class="ntitle">You've got competition! 🔥</div><div class="nbody">Sophie also matched with James. You're locked in a Trppl — win the game to win the date.</div><div class="ntime">1 min ago</div></div></div>
+      <div class="notif"><div class="nic nig"><i class="ti ti-chess"></i></div><div><div class="ntitle">Trivia challenge sent</div><div class="nbody">A trivia duel has been scheduled. James has 24 hours to accept.</div><div class="ntime">Just now</div></div></div>
+      <div class="notif"><div class="nic niw"><i class="ti ti-clock"></i></div><div><div class="ntitle">Marcus lost their Trppl</div><div class="nbody">Marcus is in the 7-day waiting room. Free until 18 May.</div><div class="ntime">Yesterday</div></div></div>
+    </div>
+  </section>
+
+  <!-- TRPPL TAB -->
+  <section id="trppl" class="screen" role="tabpanel">
+    <div class="slabel">Your active Trppl</div>
+    <div class="tcard">
+      <div class="thead2"><span class="badge bgo"><i class="ti ti-lock"></i> LOCKED</span><div class="ttimer"><i class="ti ti-clock"></i> 4d 18h left</div></div>
+      <div class="trio">
+        <div class="tperson"><div class="tav" style="background:var(--p)">Y</div><div class="tname">You</div><div class="trole">Competitor</div></div>
+        <div class="tvs">⚔</div>
+        <div class="tperson"><div class="tav" style="background:#ec4899">S</div><div class="tname">Sophie</div><div class="trole">The prize</div></div>
+        <div class="tvs">⚔</div>
+        <div class="tperson"><div class="tav" style="background:var(--b)">J</div><div class="tname">James</div><div class="trole">Competitor</div></div>
+      </div>
+      <button class="bgame" onclick="showTab('games',document.querySelectorAll('.tab')[3])"><i class="ti ti-chess"></i> Start the battle</button>
+    </div>
+    <div class="slabel">Rules</div>
+    <div class="rules-list">
+      <div class="rrow"><i class="ti ti-sword"></i><div class="rtxt">Play a game. Winner gets the date, loser goes to the waiting room.</div></div>
+      <div class="rrow"><i class="ti ti-calendar"></i><div class="rtxt">Winner has 5 days to book a date or the waiting-room user can reclaim.</div></div>
+      <div class="rrow"><i class="ti ti-clock"></i><div class="rtxt">Free users wait 7 days. Premium users can exit immediately.</div></div>
+      <div class="rrow"><i class="ti ti-ban"></i><div class="rtxt">No new matches until the Trppl resolves.</div></div>
+    </div>
+  </section>
+
+  <!-- GAMES -->
+  <section id="games" class="screen" role="tabpanel">
+    <div id="gamesList"><div class="slabel">Choose your battle</div><div class="ggrid" id="ggrid"></div></div>
+    <!-- CHESS -->
+    <div id="g-chess" class="game-wrap">
+      <div class="gnav"><div class="gnav-title">♟ Chess — vs James</div><button class="gback" onclick="exitGame()">← Back</button></div>
+      <div class="gscore"><div class="gplayer"><div class="gplname">You (White)</div><div class="gplscore" id="chMyCapt">0</div></div><div class="gvs">VS</div><div class="gplayer"><div class="gplname">James (Black)</div><div class="gplscore" id="chJCapt">0</div></div></div>
+      <div class="cturn" id="chTurn">Your turn — tap a piece to move</div>
+      <div class="cboard" id="chBoard"></div>
+      <div class="game-btn-row"><button class="gbtn gbtn-secondary" onclick="chNewGame()">New Game</button></div>
+      <div id="chResult"></div>
+    </div>
+    <!-- CHECKERS -->
+    <div id="g-checkers" class="game-wrap">
+      <div class="gnav"><div class="gnav-title">🔴 Checkers — vs James</div><button class="gback" onclick="exitGame()">← Back</button></div>
+      <div class="gscore"><div class="gplayer"><div class="gplname">You (Red)</div><div class="gplscore" id="ckMyPcs">12</div></div><div class="gvs">VS</div><div class="gplayer"><div class="gplname">James (Black)</div><div class="gplscore" id="ckJPcs">12</div></div></div>
+      <div class="cturn" id="ckTurn">Your turn — tap a piece to move</div>
+      <div class="ckboard" id="ckBoard"></div>
+      <div class="game-btn-row"><button class="gbtn gbtn-secondary" onclick="ckNewGame()">New Game</button></div>
+      <div id="ckResult"></div>
+    </div>
+    <!-- SCRABBLE -->
+    <div id="g-scrabble" class="game-wrap">
+      <div class="gnav"><div class="gnav-title">🔤 Word Battle — vs James</div><button class="gback" onclick="exitGame()">← Back</button></div>
+      <div class="gscore"><div class="gplayer"><div class="gplname">You</div><div class="gplscore" id="scMyScore">0</div></div><div class="gvs">VS</div><div class="gplayer"><div class="gplname">James</div><div class="gplscore" id="scJScore">0</div></div></div>
+      <p class="gmsg" id="scMsg">Round <span id="scRound">1</span> of 7 — spell the word!</p>
+      <div class="sboard-area"><div class="sword-display" id="scWord"></div><div class="stiles" id="scTiles"></div><div class="sclue" id="scClue"></div></div>
+      <div class="gbtns"><button class="ghalf gbtn-secondary" onclick="scClear()">Clear</button><button class="ghalf gbtn-primary" onclick="scSubmit()">Submit Word</button></div>
+      <div id="scResult"></div>
+    </div>
+    <!-- TRIVIA -->
+    <div id="g-trivia" class="game-wrap">
+      <div class="gnav"><div class="gnav-title" id="triviaNavTitle">🧠 Trivia Duel — vs James</div><button class="gback" onclick="exitGame()">← Back</button></div>
+      <div class="gscore"><div class="gplayer"><div class="gplname">You</div><div class="gplscore" id="tvMyScore">0</div></div><div class="gvs">VS</div><div class="gplayer"><div class="gplname">James</div><div class="gplscore" id="tvJScore">0</div></div></div>
+      <div class="tv-meta"><div class="tv-qnum">Question <span id="tvQNum">1</span> of 10</div><div class="tv-timer" id="tvTimer">15</div></div>
+      <div class="tv-timer-wrap"><div class="tv-timer-bar" id="tvTimerBar"></div></div>
+      <div class="tv-cat-row"><span class="badge tv-cat-badge" id="tvCatBadge">General</span></div>
+      <div class="tv-question-card"><div id="tvQuestion" class="tv-question-text"></div></div>
+      <div id="tvOptions" class="tv-options"></div>
+      <div id="tvFeedback" class="tv-feedback" hidden></div>
+      <div id="tvJamesTxt" class="tv-james-txt"></div>
+      <div id="tvResult"></div>
+    </div>
+  </section>
+
+  <!-- WAITING -->
+  <section id="waiting" class="screen" role="tabpanel">
+    <div class="slabel">Your status</div>
+    <div class="waitcard">
+      <div class="wicon"><i class="ti ti-clock"></i></div>
+      <h2 class="wtitle">You're in the waiting room</h2>
+      <p class="wbody">You lost the Trppl game. Sit tight — or go Premium to skip.</p>
+      <div class="wtimer" id="wClock">6d 23h 41m</div>
+      <p class="w-sub">until you can match again</p>
+      <button class="bpremium"><i class="ti ti-crown"></i> Go Premium — skip instantly</button>
+    </div>
+    <div class="slabel">Others waiting</div>
+    <div class="wothers">
+      <div class="wot">Free users</div>
+      <div class="wrow"><div class="wav" style="background:var(--p)">M</div><div class="winfo"><div class="wname">Marcus</div><div class="wlost">Lost to: Ella</div></div><div class="wdays">5d left</div></div>
+      <div class="wrow"><div class="wav" style="background:var(--b)">D</div><div class="winfo"><div class="wname">Daniel</div><div class="wlost">Lost to: Priya</div></div><div class="wdays">3d left</div></div>
+      <div class="wrow"><div class="wav" style="background:var(--g)">T</div><div class="winfo"><div class="wname">Tom</div><div class="wlost">Lost to: Hannah</div></div><div class="wdays">1d left</div></div>
+    </div>
+  </section>
+</div>
+
+<script src="/js/auth.js"></script>
+<script src="/js/audio.js"></script>
+<script src="/js/games/chess.js"></script>
+<script src="/js/games/checkers.js"></script>
+<script src="/js/games/scrabble.js"></script>
+<script src="/js/games/trivia.js"></script>
+<script src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+node_modules
+.env
+uploads/
+*.log
+.DS_Store
+android/
+ios/
+dist/
+.git
+.gitignore
+README.md
+scripts/
+capacitor.config.json
+android-resources/
+*.zip

@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Trppl">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="/favicon.png">
+<title>Register — Trppl</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/auth.css">
+<link rel="stylesheet" href="/css/register.css">
+</head>
+<body>
+<div class="phone auth-phone">
+  <div class="auth-header">
+    <div class="nav-brand">TRPPL</div>
+    <div class="nav-tagline">match · compete · date</div>
+  </div>
+
+  <!-- 4-step indicator -->
+  <div class="reg-steps">
+    <div class="reg-step active" id="rs1"><div class="rs-dot">1</div><div class="rs-lbl">Profile</div></div>
+    <div class="rs-line" id="rsLine1"></div>
+    <div class="reg-step" id="rs2"><div class="rs-dot">2</div><div class="rs-lbl">Lifestyle</div></div>
+    <div class="rs-line" id="rsLine2"></div>
+    <div class="reg-step" id="rs3"><div class="rs-dot">3</div><div class="rs-lbl">Contact</div></div>
+    <div class="rs-line" id="rsLine3"></div>
+    <div class="reg-step" id="rs4"><div class="rs-dot">4</div><div class="rs-lbl">Photos</div></div>
+  </div>
+
+  <div class="auth-body" style="padding-top:16px">
+    <div id="formError" class="auth-error" hidden></div>
+
+    <!-- ── STEP 1: Basic profile ── -->
+    <div id="step1" class="reg-step-content active">
+      <h1 class="auth-title">Create your profile</h1>
+      <p class="auth-sub">Tell us the basics about yourself.</p>
+
+      <div class="field">
+        <label class="field-label" for="fullName">Full name</label>
+        <div class="field-wrap">
+          <i class="ti ti-user field-icon"></i>
+          <input class="field-input" id="fullName" type="text" placeholder="Your full name" autocomplete="name">
+        </div>
+        <div class="field-error" id="err-fullName"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="username">Username</label>
+        <div class="field-wrap">
+          <i class="ti ti-at field-icon"></i>
+          <input class="field-input" id="username" type="text" placeholder="e.g. alex_trppl" autocomplete="username" oninput="checkUsername()">
+          <span class="field-status" id="usernameStatus"></span>
+        </div>
+        <div class="field-hint">3–20 characters. Letters, numbers and underscores only.</div>
+        <div class="field-error" id="err-username"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="sex">Sex</label>
+        <div class="field-wrap">
+          <i class="ti ti-gender-bigender field-icon"></i>
+          <select class="field-input field-select" id="sex">
+            <option value="">Select…</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
+        <div class="field-error" id="err-sex"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="dob">Date of birth</label>
+        <div class="field-wrap">
+          <i class="ti ti-calendar field-icon"></i>
+          <input class="field-input" id="dob" type="date" autocomplete="bdate">
+        </div>
+        <div class="field-error" id="err-dob"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="height">Height</label>
+        <div class="field-wrap">
+          <i class="ti ti-ruler-2 field-icon"></i>
+          <select class="field-input field-select" id="height">
+            <option value="">Select your height…</option>
+          </select>
+        </div>
+        <div class="field-error" id="err-height"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="city">City</label>
+        <div class="field-wrap">
+          <i class="ti ti-building-community field-icon"></i>
+          <input class="field-input" id="city" type="text" placeholder="Your city" autocomplete="address-level2">
+        </div>
+        <div class="field-error" id="err-city"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="country">Country</label>
+        <div class="field-wrap">
+          <i class="ti ti-world field-icon"></i>
+          <select class="field-input field-select" id="country">
+            <option value="">Select your country…</option>
+          </select>
+        </div>
+        <div class="field-error" id="err-country"></div>
+      </div>
+
+      <button class="auth-btn" onclick="regGoStep(2)">Continue →</button>
+      <div class="auth-divider">Already have an account? <a href="/pages/login.html" class="auth-link">Sign in</a></div>
+    </div>
+
+    <!-- ── STEP 2: Lifestyle ── -->
+    <div id="step2" class="reg-step-content">
+      <h1 class="auth-title">Your lifestyle</h1>
+      <p class="auth-sub">Help others find out if you're compatible.</p>
+
+      <div class="field">
+        <label class="field-label" for="education">Education</label>
+        <div class="field-wrap">
+          <i class="ti ti-school field-icon"></i>
+          <select class="field-input field-select" id="education">
+            <option value="">Select…</option>
+            <option value="high-school">High school</option>
+            <option value="some-college">Some college</option>
+            <option value="bachelors">Bachelor's degree</option>
+            <option value="masters">Master's degree</option>
+            <option value="phd">PhD / Doctorate</option>
+            <option value="trade-school">Trade / Vocational school</option>
+            <option value="prefer-not-to-say">Prefer not to say</option>
+          </select>
+        </div>
+        <div class="field-error" id="err-education"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="drinking">Drinking</label>
+        <div class="field-wrap">
+          <i class="ti ti-glass field-icon"></i>
+          <select class="field-input field-select" id="drinking">
+            <option value="">Select…</option>
+            <option value="yes">Yes</option>
+            <option value="socially">Socially</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+        <div class="field-error" id="err-drinking"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="smoking">Smoking</label>
+        <div class="field-wrap">
+          <i class="ti ti-smoking field-icon"></i>
+          <select class="field-input field-select" id="smoking">
+            <option value="">Select…</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+        <div class="field-error" id="err-smoking"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="haveKids">Have kids</label>
+        <div class="field-wrap">
+          <i class="ti ti-baby-carriage field-icon"></i>
+          <select class="field-input field-select" id="haveKids">
+            <option value="">Select…</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+        </div>
+        <div class="field-error" id="err-haveKids"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="wantKids">Want kids</label>
+        <div class="field-wrap">
+          <i class="ti ti-heart field-icon"></i>
+          <select class="field-input field-select" id="wantKids">
+            <option value="">Select…</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+            <option value="open">Open to it</option>
+            <option value="not-sure">Not sure</option>
+          </select>
+        </div>
+        <div class="field-error" id="err-wantKids"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="zodiac">Zodiac sign</label>
+        <div class="field-wrap">
+          <i class="ti ti-star field-icon"></i>
+          <select class="field-input field-select" id="zodiac">
+            <option value="">Select…</option>
+            <option value="aries">♈ Aries (Mar 21 – Apr 19)</option>
+            <option value="taurus">♉ Taurus (Apr 20 – May 20)</option>
+            <option value="gemini">♊ Gemini (May 21 – Jun 20)</option>
+            <option value="cancer">♋ Cancer (Jun 21 – Jul 22)</option>
+            <option value="leo">♌ Leo (Jul 23 – Aug 22)</option>
+            <option value="virgo">♍ Virgo (Aug 23 – Sep 22)</option>
+            <option value="libra">♎ Libra (Sep 23 – Oct 22)</option>
+            <option value="scorpio">♏ Scorpio (Oct 23 – Nov 21)</option>
+            <option value="sagittarius">♐ Sagittarius (Nov 22 – Dec 21)</option>
+            <option value="capricorn">♑ Capricorn (Dec 22 – Jan 19)</option>
+            <option value="aquarius">♒ Aquarius (Jan 20 – Feb 18)</option>
+            <option value="pisces">♓ Pisces (Feb 19 – Mar 20)</option>
+          </select>
+        </div>
+        <div class="field-error" id="err-zodiac"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="religion">Religion</label>
+        <div class="field-wrap">
+          <i class="ti ti-building-church field-icon"></i>
+          <select class="field-input field-select" id="religion">
+            <option value="">Select…</option>
+            <option value="christianity">Christianity</option>
+            <option value="islam">Islam</option>
+            <option value="hinduism">Hinduism</option>
+            <option value="judaism">Judaism</option>
+            <option value="buddhism">Buddhism</option>
+            <option value="sikhism">Sikhism</option>
+            <option value="spiritual">Spiritual but not religious</option>
+            <option value="agnostic">Agnostic</option>
+            <option value="atheist">Atheist</option>
+            <option value="other">Other</option>
+            <option value="prefer-not-to-say">Prefer not to say</option>
+          </select>
+        </div>
+        <div class="field-error" id="err-religion"></div>
+      </div>
+
+      <div class="btn-row" style="margin-top:4px">
+        <button class="auth-btn auth-btn-outline" onclick="regGoStep(1)" style="flex:1">← Back</button>
+        <button class="auth-btn" onclick="regGoStep(3)" style="flex:2">Continue →</button>
+      </div>
+    </div>
+
+    <!-- ── STEP 3: Contact + Password ── -->
+    <div id="step3" class="reg-step-content">
+      <h1 class="auth-title">How should we reach you?</h1>
+      <p class="auth-sub">Choose how you'll receive your verification code.</p>
+
+      <div class="contact-toggle">
+        <button class="ctog active" id="ctog-email" onclick="setContact('email')">
+          <i class="ti ti-mail"></i> Email
+        </button>
+        <button class="ctog" id="ctog-phone" onclick="setContact('phone')">
+          <i class="ti ti-phone"></i> Phone
+        </button>
+      </div>
+
+      <div id="emailFields">
+        <div class="field">
+          <label class="field-label" for="email">Email address</label>
+          <div class="field-wrap">
+            <i class="ti ti-mail field-icon"></i>
+            <input class="field-input" id="email" type="email" placeholder="you@example.com" autocomplete="email">
+          </div>
+          <div class="field-error" id="err-email"></div>
+        </div>
+      </div>
+
+      <div id="phoneFields" hidden>
+        <div class="field">
+          <label class="field-label" for="phone">Phone number</label>
+          <div class="field-wrap">
+            <i class="ti ti-phone field-icon"></i>
+            <input class="field-input" id="phone" type="tel" placeholder="+44 7700 900000" autocomplete="tel">
+          </div>
+          <div class="field-hint">Include your country code, e.g. +44 for UK.</div>
+          <div class="field-error" id="err-phone"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="password">Password</label>
+        <div class="field-wrap">
+          <i class="ti ti-lock field-icon"></i>
+          <input class="field-input" id="password" type="password" placeholder="Min 8 chars, letters + numbers" autocomplete="new-password">
+          <button type="button" class="field-toggle" onclick="togglePw('password','pwIcon')"><i class="ti ti-eye" id="pwIcon"></i></button>
+        </div>
+        <div class="field-error" id="err-password"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="confirmPw">Confirm password</label>
+        <div class="field-wrap">
+          <i class="ti ti-lock field-icon"></i>
+          <input class="field-input" id="confirmPw" type="password" placeholder="Repeat your password" autocomplete="new-password">
+          <button type="button" class="field-toggle" onclick="togglePw('confirmPw','cpwIcon')"><i class="ti ti-eye" id="cpwIcon"></i></button>
+        </div>
+        <div class="field-error" id="err-confirmPw"></div>
+      </div>
+
+      <div class="field-terms">
+        <label class="checkbox-label">
+          <input type="checkbox" id="terms">
+          <span>I agree to the <a href="#" class="auth-link">Terms of Service</a> and <a href="#" class="auth-link">Privacy Policy</a></span>
+        </label>
+        <div class="field-error" id="err-terms"></div>
+      </div>
+
+      <div class="btn-row" style="margin-top:4px">
+        <button class="auth-btn auth-btn-outline" onclick="regGoStep(2)" style="flex:1">← Back</button>
+        <button class="auth-btn" onclick="regGoStep(4)" style="flex:2">Continue →</button>
+      </div>
+    </div>
+
+    <!-- ── STEP 4: Photos ── -->
+    <div id="step4" class="reg-step-content">
+      <h1 class="auth-title">Add your photos</h1>
+      <p class="auth-sub">Upload at least 1 clear photo of your face for identity verification.</p>
+
+      <div class="photo-grid" id="photoGrid">
+        <div class="photo-slot add-slot" onclick="triggerPhotoUpload()">
+          <i class="ti ti-plus"></i>
+          <span>Add photo</span>
+        </div>
+      </div>
+      <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp" multiple style="display:none" onchange="addPhotos(this)">
+
+      <div class="photo-hint" style="margin-top:4px">
+        <i class="ti ti-info-circle"></i>
+        Use clear, well-lit face photos. Max 6 photos.
+      </div>
+      <div class="field-error" id="err-photos" style="margin-top:8px"></div>
+
+      <div class="btn-row" style="margin-top:20px">
+        <button class="auth-btn auth-btn-outline" onclick="regGoStep(3)" style="flex:1">← Back</button>
+        <button class="auth-btn" id="submitBtn" onclick="submitRegistration()" style="flex:2">
+          <span id="submitLabel">Create account</span>
+          <span id="submitSpinner" class="spinner" hidden></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/auth.js"></script>
+<script src="/js/sw-register.js"></script>
+<script>
+(function () {
+  // ── Populate dropdowns ───────────────────────────────────────────────────
+  const COUNTRIES = ['Afghanistan','Albania','Algeria','Andorra','Angola','Antigua and Barbuda','Argentina','Armenia','Australia','Austria','Azerbaijan','Bahamas','Bahrain','Bangladesh','Barbados','Belarus','Belgium','Belize','Benin','Bhutan','Bolivia','Bosnia and Herzegovina','Botswana','Brazil','Brunei','Bulgaria','Burkina Faso','Burundi','Cabo Verde','Cambodia','Cameroon','Canada','Central African Republic','Chad','Chile','China','Colombia','Comoros','Congo','Costa Rica','Croatia','Cuba','Cyprus','Czech Republic','Denmark','Djibouti','Dominica','Dominican Republic','Ecuador','Egypt','El Salvador','Equatorial Guinea','Eritrea','Estonia','Eswatini','Ethiopia','Fiji','Finland','France','Gabon','Gambia','Georgia','Germany','Ghana','Greece','Grenada','Guatemala','Guinea','Guinea-Bissau','Guyana','Haiti','Honduras','Hungary','Iceland','India','Indonesia','Iran','Iraq','Ireland','Israel','Italy','Jamaica','Japan','Jordan','Kazakhstan','Kenya','Kiribati','Kuwait','Kyrgyzstan','Laos','Latvia','Lebanon','Lesotho','Liberia','Libya','Liechtenstein','Lithuania','Luxembourg','Madagascar','Malawi','Malaysia','Maldives','Mali','Malta','Marshall Islands','Mauritania','Mauritius','Mexico','Micronesia','Moldova','Monaco','Mongolia','Montenegro','Morocco','Mozambique','Myanmar','Namibia','Nauru','Nepal','Netherlands','New Zealand','Nicaragua','Niger','Nigeria','North Korea','North Macedonia','Norway','Oman','Pakistan','Palau','Palestine','Panama','Papua New Guinea','Paraguay','Peru','Philippines','Poland','Portugal','Qatar','Romania','Russia','Rwanda','Saint Kitts and Nevis','Saint Lucia','Saint Vincent and the Grenadines','Samoa','San Marino','Sao Tome and Principe','Saudi Arabia','Senegal','Serbia','Seychelles','Sierra Leone','Singapore','Slovakia','Slovenia','Solomon Islands','Somalia','South Africa','South Korea','South Sudan','Spain','Sri Lanka','Sudan','Suriname','Sweden','Switzerland','Syria','Taiwan','Tajikistan','Tanzania','Thailand','Timor-Leste','Togo','Tonga','Trinidad and Tobago','Tunisia','Turkey','Turkmenistan','Tuvalu','Uganda','Ukraine','United Arab Emirates','United Kingdom','United States','Uruguay','Uzbekistan','Vanuatu','Vatican City','Venezuela','Vietnam','Yemen','Zambia','Zimbabwe'];
+  const cSel = document.getElementById('country');
+  COUNTRIES.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; cSel.appendChild(o); });
+
+  // Height options: 4'0" (122cm) to 7'0" (213cm)
+  const hSel = document.getElementById('height');
+  const heights = [];
+  for (let cm = 140; cm <= 220; cm++) {
+    const totalInches = Math.round(cm / 2.54);
+    const ft = Math.floor(totalInches / 12);
+    const inch = totalInches % 12;
+    heights.push({ value: cm + 'cm', label: `${ft}'${inch}" (${cm} cm)` });
+  }
+  heights.forEach(h => { const o = document.createElement('option'); o.value = h.value; o.textContent = h.label; hSel.appendChild(o); });
+
+  let contactMethod = 'email';
+  let photoFiles    = [];
+  let usernameTimer = null;
+
+  // ── Step navigation ──────────────────────────────────────────────────────
+  const TOTAL_STEPS = 4;
+
+  window.regGoStep = function(n) {
+    if (n === 2 && !validateStep1()) return;
+    if (n === 3 && !validateStep2()) return;
+    if (n === 4 && !validateStep3()) return;
+    if (n > 1 && n > 2 && !validateStep2()) { /* allow back */ }
+
+    // Allow going back without validation
+    const goingBack = n < getCurrentStep();
+    if (!goingBack) {
+      if (n === 2 && !validateStep1()) return;
+      if (n === 3 && !validateStep2()) return;
+      if (n === 4 && !validateStep3()) return;
+    }
+
+    document.querySelectorAll('.reg-step-content').forEach(s => s.classList.remove('active'));
+    document.getElementById('step' + n).classList.add('active');
+    document.querySelectorAll('.reg-step').forEach((s, i) => {
+      s.classList.remove('active','done');
+      if (i + 1 < n) s.classList.add('done');
+      if (i + 1 === n) s.classList.add('active');
+    });
+    for (let i = 1; i < TOTAL_STEPS; i++) {
+      const line = document.getElementById('rsLine' + i);
+      if (line) line.classList.toggle('done', i < n);
+    }
+    clearErrors(); window.scrollTo(0, 0);
+  };
+
+  function getCurrentStep() {
+    for (let i = 1; i <= TOTAL_STEPS; i++) {
+      const s = document.getElementById('step' + i);
+      if (s && s.classList.contains('active')) return i;
+    }
+    return 1;
+  }
+
+  // ── Username availability check ──────────────────────────────────────────
+  window.checkUsername = function() {
+    clearTimeout(usernameTimer);
+    const val = document.getElementById('username').value.trim();
+    const st  = document.getElementById('usernameStatus');
+    if (val.length < 3) { st.textContent = ''; return; }
+    st.textContent = '⏳'; st.style.color = '';
+    usernameTimer = setTimeout(async () => {
+      try {
+        const res  = await fetch('/api/auth/check-username?username=' + encodeURIComponent(val));
+        const data = await res.json();
+        st.textContent = data.available ? '✅' : '❌ Taken';
+        st.style.color = data.available ? '#16a34a' : '#dc2626';
+      } catch { st.textContent = ''; }
+    }, 500);
+  };
+
+  // ── Contact method toggle ────────────────────────────────────────────────
+  window.setContact = function(method) {
+    contactMethod = method;
+    document.getElementById('ctog-email').classList.toggle('active', method === 'email');
+    document.getElementById('ctog-phone').classList.toggle('active', method === 'phone');
+    document.getElementById('emailFields').hidden = method !== 'email';
+    document.getElementById('phoneFields').hidden = method !== 'phone';
+  };
+
+  // ── Password visibility ──────────────────────────────────────────────────
+  window.togglePw = function(inputId, iconId) {
+    const inp = document.getElementById(inputId);
+    const ico = document.getElementById(iconId);
+    inp.type  = inp.type === 'password' ? 'text' : 'password';
+    ico.className = inp.type === 'password' ? 'ti ti-eye' : 'ti ti-eye-off';
+  };
+
+  // ── Photo upload ─────────────────────────────────────────────────────────
+  window.triggerPhotoUpload = function() { document.getElementById('photoInput').click(); };
+
+  window.addPhotos = function(input) {
+    Array.from(input.files).forEach(f => { if (photoFiles.length < 6 && f.type.startsWith('image/')) photoFiles.push(f); });
+    renderPhotoGrid(); input.value = '';
+  };
+
+  window.removePhoto = function(idx) { photoFiles.splice(idx, 1); renderPhotoGrid(); };
+
+  function renderPhotoGrid() {
+    const grid = document.getElementById('photoGrid');
+    grid.innerHTML = '';
+    photoFiles.forEach((f, i) => {
+      const slot = document.createElement('div'); slot.className = 'photo-slot';
+      const img  = document.createElement('img'); img.src = URL.createObjectURL(f); img.alt = 'Photo ' + (i+1);
+      const btn  = document.createElement('button'); btn.className = 'photo-remove'; btn.innerHTML = '<i class="ti ti-x"></i>'; btn.onclick = () => removePhoto(i);
+      slot.appendChild(img); slot.appendChild(btn); grid.appendChild(slot);
+    });
+    if (photoFiles.length < 6) {
+      const add = document.createElement('div'); add.className = 'photo-slot add-slot';
+      add.innerHTML = '<i class="ti ti-plus"></i><span>Add photo</span>';
+      add.onclick = triggerPhotoUpload; grid.appendChild(add);
+    }
+  }
+
+  // ── Error helpers ────────────────────────────────────────────────────────
+  function setErr(id, msg) {
+    const e = document.getElementById('err-' + id);
+    if (e) { e.textContent = msg || ''; e.hidden = !msg; }
+  }
+
+  function clearErrors() {
+    document.querySelectorAll('.field-error').forEach(e => { e.textContent = ''; e.hidden = true; });
+    const fe = document.getElementById('formError'); fe.hidden = true; fe.textContent = '';
+  }
+
+  // ── Validation ───────────────────────────────────────────────────────────
+  function validateStep1() {
+    clearErrors(); let ok = true;
+    const fullName = document.getElementById('fullName').value.trim();
+    const username = document.getElementById('username').value.trim();
+    const sex      = document.getElementById('sex').value;
+    const dob      = document.getElementById('dob').value;
+    const height   = document.getElementById('height').value;
+    const city     = document.getElementById('city').value.trim();
+    const country  = document.getElementById('country').value;
+
+    if (fullName.length < 2)                     { setErr('fullName', 'Enter your full name.'); ok = false; }
+    if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) { setErr('username', '3–20 chars, letters/numbers/underscores only.'); ok = false; }
+    if (!sex)                                    { setErr('sex', 'Please select your sex.'); ok = false; }
+    if (!dob)                                    { setErr('dob', 'Date of birth is required.'); ok = false; }
+    else if ((new Date() - new Date(dob)) / (365.25*24*60*60*1000) < 18) { setErr('dob', 'You must be 18 or older.'); ok = false; }
+    if (!height)                                 { setErr('height', 'Please select your height.'); ok = false; }
+    if (city.length < 2)                         { setErr('city', 'Enter your city.'); ok = false; }
+    if (!country)                                { setErr('country', 'Select your country.'); ok = false; }
+    return ok;
+  }
+
+  function validateStep2() {
+    clearErrors(); let ok = true;
+    if (!document.getElementById('education').value) { setErr('education', 'Please select your education level.'); ok = false; }
+    if (!document.getElementById('drinking').value)  { setErr('drinking', 'Please select your drinking habit.'); ok = false; }
+    if (!document.getElementById('smoking').value)   { setErr('smoking', 'Please select.'); ok = false; }
+    if (!document.getElementById('haveKids').value)  { setErr('haveKids', 'Please select.'); ok = false; }
+    if (!document.getElementById('wantKids').value)  { setErr('wantKids', 'Please select.'); ok = false; }
+    if (!document.getElementById('zodiac').value)    { setErr('zodiac', 'Please select your zodiac sign.'); ok = false; }
+    if (!document.getElementById('religion').value)  { setErr('religion', 'Please select.'); ok = false; }
+    return ok;
+  }
+
+  function validateStep3() {
+    clearErrors(); let ok = true;
+    const password  = document.getElementById('password').value;
+    const confirmPw = document.getElementById('confirmPw').value;
+    const terms     = document.getElementById('terms').checked;
+    if (contactMethod === 'email') {
+      const email = document.getElementById('email').value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setErr('email', 'Enter a valid email address.'); ok = false; }
+    } else {
+      const phone = document.getElementById('phone').value.replace(/\s/g,'');
+      if (!/^\+?[1-9]\d{6,14}$/.test(phone)) { setErr('phone', 'Enter a valid phone number with country code.'); ok = false; }
+    }
+    if (password.length < 8 || !/[a-zA-Z]/.test(password) || !/\d/.test(password)) { setErr('password', 'Min 8 chars with at least one letter and one number.'); ok = false; }
+    if (password !== confirmPw) { setErr('confirmPw', 'Passwords do not match.'); ok = false; }
+    if (!terms) { setErr('terms', 'You must agree to the terms.'); ok = false; }
+    return ok;
+  }
+
+  // ── Submit ───────────────────────────────────────────────────────────────
+  window.submitRegistration = async function() {
+    clearErrors();
+    if (photoFiles.length === 0) { setErr('photos', 'Add at least one photo of your face.'); return; }
+
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('fullName',      document.getElementById('fullName').value.trim());
+      formData.append('username',      document.getElementById('username').value.trim());
+      formData.append('sex',           document.getElementById('sex').value);
+      formData.append('dob',           document.getElementById('dob').value);
+      formData.append('height',        document.getElementById('height').value);
+      formData.append('city',          document.getElementById('city').value.trim());
+      formData.append('country',       document.getElementById('country').value);
+      formData.append('education',     document.getElementById('education').value);
+      formData.append('drinking',      document.getElementById('drinking').value);
+      formData.append('smoking',       document.getElementById('smoking').value);
+      formData.append('haveKids',      document.getElementById('haveKids').value);
+      formData.append('wantKids',      document.getElementById('wantKids').value);
+      formData.append('zodiac',        document.getElementById('zodiac').value);
+      formData.append('religion',      document.getElementById('religion').value);
+      formData.append('contactMethod', contactMethod);
+      formData.append('password',      document.getElementById('password').value);
+      if (contactMethod === 'email') formData.append('email', document.getElementById('email').value.trim());
+      else                           formData.append('phone', document.getElementById('phone').value.trim());
+      photoFiles.forEach(f => formData.append('photos', f));
+
+      const res  = await fetch('/api/auth/register', { method: 'POST', body: formData });
+      const data = await res.json();
+
+      if (!res.ok) {
+        if (data.fields) {
+          Object.entries(data.fields).forEach(([k, v]) => setErr(k, v));
+          const fe = document.getElementById('formError'); fe.textContent = 'Please fix the errors above.'; fe.hidden = false;
+        } else {
+          const fe = document.getElementById('formError'); fe.textContent = data.error; fe.hidden = false;
+        }
+        setLoading(false); return;
+      }
+
+      const contact = contactMethod === 'email' ? document.getElementById('email').value.trim() : document.getElementById('phone').value.trim();
+      sessionStorage.setItem('otp_contact', contact);
+      sessionStorage.setItem('otp_method',  contactMethod);
+      sessionStorage.setItem('otp_purpose', 'register');
+      sessionStorage.setItem('otp_masked',  data.contact || contact);
+      window.location.href = '/pages/verify-otp.html';
+    } catch (err) {
+      const fe = document.getElementById('formError'); fe.textContent = 'Something went wrong. Please try again.'; fe.hidden = false;
+      setLoading(false);
+    }
+  };
+
+  function setLoading(on) {
+    document.getElementById('submitBtn').disabled = on;
+    document.getElementById('submitLabel').hidden  = on;
+    document.getElementById('submitSpinner').hidden = !on;
+  }
+})();
+</script>
+</body>
+</html>

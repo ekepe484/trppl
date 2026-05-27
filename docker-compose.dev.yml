@@ -1,0 +1,25 @@
+version: '3.9'
+
+# Development override — use with:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# This mounts the source code into the container so changes are reflected
+# without rebuilding the image.
+
+services:
+  app:
+    build:
+      target: deps          # stop at deps stage — no need for runner optimisations
+    command: npx nodemon backend/server.js
+    environment:
+      NODE_ENV: development
+      TWILIO_DEV_MODE: "true"
+    volumes:
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
+      - ./package.json:/app/package.json
+      # Don't mount node_modules — use the container's copy
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+      - "9229:9229"         # Node.js debugger port
