@@ -16,11 +16,17 @@ const pool = new Pool({
 
 pool.on('error', (err) => { console.error('[DB] Pool error:', err.message); });
 
+// Keep the connection warm — ping every 4 minutes so Azure doesn't idle it out
+setInterval(async () => {
+  try { await pool.query('SELECT 1'); }
+  catch (err) { console.warn('[DB] Keep-alive ping failed:', err.message); }
+}, 4 * 60 * 1000);
+
 async function query(sql, params = []) {
   const start  = Date.now();
   const result = await pool.query(sql, params);
   const dur    = Date.now() - start;
-  if (dur > 500) console.warn(`[DB] Slow query (${dur}ms): ${sql.slice(0, 80)}`);
+  if (dur > 2000) console.warn(`[DB] Slow query (${dur}ms): ${sql.slice(0, 80)}`);
   return result;
 }
 
