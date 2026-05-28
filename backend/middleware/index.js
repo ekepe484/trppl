@@ -37,28 +37,16 @@ const apiLimiter = rateLimit({
 });
 
 function errorHandler(err, req, res, next) {
-  const status = err.status || 500;
+  const status  = err.status || 500;
   const message = config.isDev ? err.message : 'Something went wrong';
   console.error(`[${new Date().toISOString()}] ${status} ${req.method} ${req.path} — ${err.message}`);
   res.status(status).json({ error: message });
 }
 
+// CSP disabled for testing — re-enable with proper nonces before going to production
 const helmetOptions = {
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc:     ["'self'"],
-      scriptSrc:      ["'self'"],
-      styleSrc:       ["'self'", "https://cdn.jsdelivr.net", "'unsafe-inline'"],
-      fontSrc:        ["'self'", "https://cdn.jsdelivr.net"],
-      imgSrc:         ["'self'", "data:", "blob:"],
-      mediaSrc:       ["'self'", "blob:"],
-      connectSrc:     ["'self'"],
-      workerSrc:      ["'self'", "blob:"],
-      frameSrc:       ["'none'"],
-      objectSrc:      ["'none'"],
-      upgradeInsecureRequests: [],
-    },
-  },
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false,
 };
 
 module.exports = { corsOptions, triviaLimiter, apiLimiter, authLimiter, errorHandler, helmetOptions };
