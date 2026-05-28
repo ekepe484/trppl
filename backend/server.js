@@ -17,6 +17,7 @@ const app = express();
 
 app.use(helmet(helmetOptions));
 app.use(cors(corsOptions));
+app.set('trust proxy', 1); // trust Azure's load balancer / reverse proxy
 app.use(express.json({ limit: '10kb' }));
 
 if (config.isDev) {
@@ -42,21 +43,27 @@ app.get('*', (req, res, next) => {
 app.use(errorHandler);
 
 async function start() {
-  try { await migrate(); } catch (err) {
-    console.error('[DB] Migration failed:', err.message); process.exit(1);
-  }
-  app.listen(config.port, () => {
-    console.log(`
-  ┌──────────────────────────────────────────┐
-  │  🔺 TRPPL server running                 │
-  │  http://localhost:${config.port}                 │
-  │  Env:       ${config.nodeEnv.padEnd(30)}│
-  │  DB:        ${config.db.url ? '✅ configured' : '❌ MISSING      '}           │
-  │  Anthropic: ${config.anthropic.apiKey ? '✅ configured' : '❌ MISSING      '}           │
-  │  Twilio:    ${config.twilio.devMode ? '⚠️  dev mode (SMS not sent)  ' : config.twilio.accountSid ? '✅ configured' : '❌ MISSING      '}│
-  └──────────────────────────────────────────┘
-    `);
+  // Start listening first so Azure health checks pass and we get real logs
+  const port = config.port;
+  app.listen(port, () => {
+    console.log('');
+    console.log('  TRPPL server started on port ' + port);
+    console.log('  NODE_ENV:       ' + config.nodeEnv);
+    console.log('  DATABASE_URL:   ' + (config.db.url ? 'set (' + config.db.url.replace(/:([^:@]{1,40})@/, ':****@') + ')' : 'NOT SET'));
+    console.log('  ANTHROPIC_KEY:  ' + (config.anthropic.apiKey ? 'set' : 'NOT SET'));
+    console.log('');
   });
+
+  // Run migrations after server is up — log errors but don't crash
+  try {
+    await migrate();
+    console.log('[DB] Migrations complete.');
+  } catch (err) {
+    console.error('[DB] Migration error: ' + err.message);
+    console.error('[DB] Full error: ' + err.stack);
+    console.error('[DB] Check DATABASE_URL is correct and the PostgreSQL server allows connections from Azure.');
+    // Don't exit — keep server running so /api/health returns useful info
+  }
 }
 
 start();
