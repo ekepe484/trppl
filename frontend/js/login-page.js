@@ -71,3 +71,23 @@
   // Allow Enter key
   document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 })();
+
+// ── Wire up buttons ───────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+  var btn;
+
+  btn = document.getElementById('ltog-email');
+  if (btn) btn.addEventListener('click', function () { setMode('email'); });
+
+  btn = document.getElementById('ltog-phone');
+  if (btn) btn.addEventListener('click', function () { setMode('phone'); });
+
+  btn = document.getElementById('btn-pw-toggle');
+  if (btn) btn.addEventListener('click', function () { togglePw(); });
+
+  btn = document.getElementById('loginBtn');
+  if (btn) btn.addEventListener('click', function () { doLogin(); });
+
+  // Allow Enter key to submit
+  document.addEventListener('keydown', function (e) { if (e.key === 'Enter') doLogin(); });
+});

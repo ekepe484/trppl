@@ -178,3 +178,14 @@
 
   startResendCooldown();
 })();
+
+// ── Wire up buttons ───────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+  var btn;
+
+  btn = document.getElementById('otpVerifyBtn');
+  if (btn) btn.addEventListener('click', function () { verifyOtp(); });
+
+  btn = document.getElementById('otpResendBtn');
+  if (btn) btn.addEventListener('click', function () { resendOtp(); });
+});

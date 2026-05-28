@@ -25,15 +25,27 @@
 <div class="phone">
   <div class="sbar"><span id="clk">9:41</span><span><i class="ti ti-wifi"></i>&nbsp;<i class="ti ti-battery"></i></span></div>
   <div class="nav">
-    <div><div class="nav-brand">TRPPL</div><div class="nav-tagline">match · compete · date</div></div>
+    <div style="display:flex;align-items:center;gap:10px">
+  <svg width="36" height="28" viewBox="0 0 680 280" role="img" xmlns="http://www.w3.org/2000/svg" aria-label="Trppl">
+    <polygon points="248,228 308,112 368,228" fill="#f472b6"/>
+    <polygon points="312,228 372,112 432,228" fill="#38bdf8"/>
+    <polygon points="280,228 340,84 400,228" fill="#7c3aed"/>
+    <circle cx="310" cy="178" r="4" fill="#fff" opacity="0.5"/>
+    <circle cx="370" cy="178" r="4" fill="#fff" opacity="0.5"/>
+  </svg>
+  <div>
+    <div style="color:#fff;font-size:20px;font-weight:800;letter-spacing:0.2em;line-height:1">TRPPL</div>
+    <div style="color:#a78bfa;font-size:10px;letter-spacing:0.12em">match · compete · date</div>
+  </div>
+</div>
     <div class="nav-avatar" id="navAvatar">A</div>
   </div>
   <nav class="tabs" role="tablist">
-    <button class="tab active" onclick="showTab('discover',this)" role="tab"><i class="ti ti-flame"></i>Discover</button>
-    <button class="tab" onclick="showTab('notifs',this)" role="tab"><i class="ti ti-bell"></i>Alerts</button>
-    <button class="tab" onclick="showTab('trppl',this)" role="tab"><i class="ti ti-users"></i>Trppl</button>
-    <button class="tab" onclick="showTab('games',this)" role="tab"><i class="ti ti-chess"></i>Games</button>
-    <button class="tab" onclick="showTab('waiting',this)" role="tab"><i class="ti ti-clock"></i>Waiting</button>
+    <button class="tab active" id="tab-discover" role="tab"><i class="ti ti-flame"></i>Discover</button>
+    <button class="tab" id="tab-notifs" role="tab"><i class="ti ti-bell"></i>Alerts</button>
+    <button class="tab" id="tab-trppl" role="tab"><i class="ti ti-users"></i>Trppl</button>
+    <button class="tab" id="tab-games" role="tab"><i class="ti ti-chess"></i>Games</button>
+    <button class="tab" id="tab-waiting" role="tab"><i class="ti ti-clock"></i>Waiting</button>
   </nav>
 
   <!-- DISCOVER -->
@@ -43,11 +55,11 @@
       <div class="pdots"><div class="pdot done"></div><div class="pdot done"></div><div class="pdot done"></div><div class="pdot done"></div><div class="pdot"></div></div>
       <p class="quiz-q">Which means the most to you in a relationship?</p>
       <div class="quiz-opts">
-        <button class="qopt sel" data-ll="Words of Affirmation" onclick="pickOpt(this)">💬 Words of Affirmation<span class="ll-desc">Compliments, "I love you", encouragement</span></button>
-        <button class="qopt" data-ll="Acts of Service" onclick="pickOpt(this)">🛠 Acts of Service<span class="ll-desc">Helping out, doing things without being asked</span></button>
-        <button class="qopt" data-ll="Receiving Gifts" onclick="pickOpt(this)">🎁 Receiving Gifts<span class="ll-desc">Thoughtful presents, tokens of affection</span></button>
-        <button class="qopt" data-ll="Quality Time" onclick="pickOpt(this)">🕐 Quality Time<span class="ll-desc">Undivided attention, being truly present</span></button>
-        <button class="qopt" data-ll="Physical Touch" onclick="pickOpt(this)">🤗 Physical Touch<span class="ll-desc">Hugs, hand-holding, physical closeness</span></button>
+        <button class="qopt sel" data-ll="Words of Affirmation" class-pick-opt="1">💬 Words of Affirmation<span class="ll-desc">Compliments, "I love you", encouragement</span></button>
+        <button class="qopt" data-ll="Acts of Service" class-pick-opt="1">🛠 Acts of Service<span class="ll-desc">Helping out, doing things without being asked</span></button>
+        <button class="qopt" data-ll="Receiving Gifts" class-pick-opt="1">🎁 Receiving Gifts<span class="ll-desc">Thoughtful presents, tokens of affection</span></button>
+        <button class="qopt" data-ll="Quality Time" class-pick-opt="1">🕐 Quality Time<span class="ll-desc">Undivided attention, being truly present</span></button>
+        <button class="qopt" data-ll="Physical Touch" class-pick-opt="1">🤗 Physical Touch<span class="ll-desc">Hugs, hand-holding, physical closeness</span></button>
       </div>
     </div>
     <div class="slabel">Your best match today</div>
@@ -58,8 +70,8 @@
         <p class="pmeta"><i class="ti ti-map-pin"></i> <span id="pdist">3 miles away · Manchester</span></p>
         <div class="llpills" id="pll"><span class="llpill">Words of affirmation</span><span class="llpill">Quality time</span></div>
         <div class="arow">
-          <button class="bpass" onclick="passP()"><i class="ti ti-x"></i> Pass</button>
-          <button class="bmatch" onclick="matchP()"><i class="ti ti-heart"></i> Match</button>
+          <button class="bpass" id="btn-pass"><i class="ti ti-x"></i> Pass</button>
+          <button class="bmatch" id="btn-match"><i class="ti ti-heart"></i> Match</button>
         </div>
       </div>
     </div>
@@ -88,7 +100,7 @@
         <div class="tvs">⚔</div>
         <div class="tperson"><div class="tav" style="background:var(--b)">J</div><div class="tname">James</div><div class="trole">Competitor</div></div>
       </div>
-      <button class="bgame" onclick="showTab('games',document.querySelectorAll('.tab')[3])"><i class="ti ti-chess"></i> Start the battle</button>
+      <button class="bgame" id="btn-start-battle"><i class="ti ti-chess"></i> Start the battle</button>
     </div>
     <div class="slabel">Rules</div>
     <div class="rules-list">
@@ -104,34 +116,34 @@
     <div id="gamesList"><div class="slabel">Choose your battle</div><div class="ggrid" id="ggrid"></div></div>
     <!-- CHESS -->
     <div id="g-chess" class="game-wrap">
-      <div class="gnav"><div class="gnav-title">♟ Chess — vs James</div><button class="gback" onclick="exitGame()">← Back</button></div>
+      <div class="gnav"><div class="gnav-title">♟ Chess — vs James</div><button class="gback" class="gback" id="gback-chess">← Back</button></div>
       <div class="gscore"><div class="gplayer"><div class="gplname">You (White)</div><div class="gplscore" id="chMyCapt">0</div></div><div class="gvs">VS</div><div class="gplayer"><div class="gplname">James (Black)</div><div class="gplscore" id="chJCapt">0</div></div></div>
       <div class="cturn" id="chTurn">Your turn — tap a piece to move</div>
       <div class="cboard" id="chBoard"></div>
-      <div class="game-btn-row"><button class="gbtn gbtn-secondary" onclick="chNewGame()">New Game</button></div>
+      <div class="game-btn-row"><button class="gbtn gbtn-secondary" id="btn-ch-new">New Game</button></div>
       <div id="chResult"></div>
     </div>
     <!-- CHECKERS -->
     <div id="g-checkers" class="game-wrap">
-      <div class="gnav"><div class="gnav-title">🔴 Checkers — vs James</div><button class="gback" onclick="exitGame()">← Back</button></div>
+      <div class="gnav"><div class="gnav-title">🔴 Checkers — vs James</div><button class="gback" class="gback" id="gback-checkers">← Back</button></div>
       <div class="gscore"><div class="gplayer"><div class="gplname">You (Red)</div><div class="gplscore" id="ckMyPcs">12</div></div><div class="gvs">VS</div><div class="gplayer"><div class="gplname">James (Black)</div><div class="gplscore" id="ckJPcs">12</div></div></div>
       <div class="cturn" id="ckTurn">Your turn — tap a piece to move</div>
       <div class="ckboard" id="ckBoard"></div>
-      <div class="game-btn-row"><button class="gbtn gbtn-secondary" onclick="ckNewGame()">New Game</button></div>
+      <div class="game-btn-row"><button class="gbtn gbtn-secondary" id="btn-ck-new">New Game</button></div>
       <div id="ckResult"></div>
     </div>
     <!-- SCRABBLE -->
     <div id="g-scrabble" class="game-wrap">
-      <div class="gnav"><div class="gnav-title">🔤 Word Battle — vs James</div><button class="gback" onclick="exitGame()">← Back</button></div>
+      <div class="gnav"><div class="gnav-title">🔤 Word Battle — vs James</div><button class="gback" class="gback" id="gback-scrabble">← Back</button></div>
       <div class="gscore"><div class="gplayer"><div class="gplname">You</div><div class="gplscore" id="scMyScore">0</div></div><div class="gvs">VS</div><div class="gplayer"><div class="gplname">James</div><div class="gplscore" id="scJScore">0</div></div></div>
       <p class="gmsg" id="scMsg">Round <span id="scRound">1</span> of 7 — spell the word!</p>
       <div class="sboard-area"><div class="sword-display" id="scWord"></div><div class="stiles" id="scTiles"></div><div class="sclue" id="scClue"></div></div>
-      <div class="gbtns"><button class="ghalf gbtn-secondary" onclick="scClear()">Clear</button><button class="ghalf gbtn-primary" onclick="scSubmit()">Submit Word</button></div>
+      <div class="gbtns"><button class="ghalf gbtn-secondary" id="btn-sc-clear">Clear</button><button class="ghalf gbtn-primary" id="btn-sc-submit">Submit Word</button></div>
       <div id="scResult"></div>
     </div>
     <!-- TRIVIA -->
     <div id="g-trivia" class="game-wrap">
-      <div class="gnav"><div class="gnav-title" id="triviaNavTitle">🧠 Trivia Duel — vs James</div><button class="gback" onclick="exitGame()">← Back</button></div>
+      <div class="gnav"><div class="gnav-title" id="triviaNavTitle">🧠 Trivia Duel — vs James</div><button class="gback" class="gback" id="gback-trivia">← Back</button></div>
       <div class="gscore"><div class="gplayer"><div class="gplname">You</div><div class="gplscore" id="tvMyScore">0</div></div><div class="gvs">VS</div><div class="gplayer"><div class="gplname">James</div><div class="gplscore" id="tvJScore">0</div></div></div>
       <div class="tv-meta"><div class="tv-qnum">Question <span id="tvQNum">1</span> of 10</div><div class="tv-timer" id="tvTimer">15</div></div>
       <div class="tv-timer-wrap"><div class="tv-timer-bar" id="tvTimerBar"></div></div>

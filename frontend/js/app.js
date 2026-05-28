@@ -275,3 +275,48 @@ function showInstallBanner() {
   });
 }
 function dismissInstall() { localStorage.setItem('pwa_dismissed','1'); const b=el('installBanner'); if(b) b.remove(); }
+
+// ── Wire all buttons via addEventListener (CSP-safe, no onclick attrs) ─────────
+document.addEventListener('DOMContentLoaded', function () {
+  // Tabs
+  var tabs = [
+    { id: 'tab-discover',  tab: 'discover'  },
+    { id: 'tab-notifs',    tab: 'notifs'    },
+    { id: 'tab-trppl',     tab: 'trppl'     },
+    { id: 'tab-games',     tab: 'games'     },
+    { id: 'tab-waiting',   tab: 'waiting'   },
+  ];
+  tabs.forEach(function (t) {
+    var btn = document.getElementById(t.id);
+    if (btn) btn.addEventListener('click', function () { showTab(t.tab, btn); });
+  });
+
+  // Discover
+  document.querySelectorAll('[class-pick-opt]').forEach(function (btn) {
+    btn.addEventListener('click', function () { pickOpt(btn); });
+  });
+  var passBtn  = document.getElementById('btn-pass');
+  var matchBtn = document.getElementById('btn-match');
+  if (passBtn)  passBtn.addEventListener('click',  passP);
+  if (matchBtn) matchBtn.addEventListener('click', matchP);
+
+  // Start battle button in Trppl tab
+  var battleBtn = document.getElementById('btn-start-battle');
+  if (battleBtn) battleBtn.addEventListener('click', function () {
+    var gamesTab = document.getElementById('tab-games');
+    if (gamesTab) showTab('games', gamesTab);
+  });
+
+  // Game back buttons
+  ['gback-chess','gback-checkers','gback-scrabble','gback-trivia'].forEach(function (id) {
+    var btn = document.getElementById(id);
+    if (btn) btn.addEventListener('click', exitGame);
+  });
+
+  // Game action buttons
+  var b;
+  b = document.getElementById('btn-ch-new');   if (b) b.addEventListener('click', chNewGame);
+  b = document.getElementById('btn-ck-new');   if (b) b.addEventListener('click', ckNewGame);
+  b = document.getElementById('btn-sc-clear'); if (b) b.addEventListener('click', scClear);
+  b = document.getElementById('btn-sc-submit');if (b) b.addEventListener('click', scSubmit);
+});

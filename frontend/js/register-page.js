@@ -226,3 +226,52 @@
     document.getElementById('submitSpinner').hidden = !on;
   }
 })();
+
+// ── Wire up all buttons via addEventListener (no inline onclick) ──────────────
+document.addEventListener('DOMContentLoaded', function () {
+  var btn;
+
+  btn = document.getElementById('btn-step1-next');
+  if (btn) btn.addEventListener('click', function () { regGoStep(2); });
+
+  btn = document.getElementById('btn-step2-back');
+  if (btn) btn.addEventListener('click', function () { regGoStep(1); });
+
+  btn = document.getElementById('btn-step2-next');
+  if (btn) btn.addEventListener('click', function () { regGoStep(3); });
+
+  btn = document.getElementById('btn-step3-back');
+  if (btn) btn.addEventListener('click', function () { regGoStep(2); });
+
+  btn = document.getElementById('btn-step3-next');
+  if (btn) btn.addEventListener('click', function () { regGoStep(4); });
+
+  btn = document.getElementById('btn-step4-back');
+  if (btn) btn.addEventListener('click', function () { regGoStep(3); });
+
+  btn = document.getElementById('submitBtn');
+  if (btn) btn.addEventListener('click', function () { submitRegistration(); });
+
+  btn = document.getElementById('ctog-email');
+  if (btn) btn.addEventListener('click', function () { setContact('email'); });
+
+  btn = document.getElementById('ctog-phone');
+  if (btn) btn.addEventListener('click', function () { setContact('phone'); });
+
+  btn = document.getElementById('btn-pw-toggle');
+  if (btn) btn.addEventListener('click', function () { togglePw('password', 'pwIcon'); });
+
+  btn = document.getElementById('btn-cpw-toggle');
+  if (btn) btn.addEventListener('click', function () { togglePw('confirmPw', 'cpwIcon'); });
+
+  btn = document.getElementById('btn-add-photo');
+  if (btn) btn.addEventListener('click', function () { triggerPhotoUpload(); });
+
+  // Username check on input
+  var usernameInput = document.getElementById('username');
+  if (usernameInput) usernameInput.addEventListener('input', function () { checkUsername(); });
+});
+
+  // Photo file input
+  var photoInput = document.getElementById('photoInput');
+  if (photoInput) photoInput.addEventListener('change', function () { addPhotos(this); });

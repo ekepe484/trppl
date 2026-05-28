@@ -48,7 +48,7 @@
         <div class="vsl-row"><div class="vsl-num">4</div><div class="vsl-txt">Get your verified badge instantly on approval</div></div>
       </div>
 
-      <button class="auth-btn" onclick="startVerification()" style="margin-top:24px">
+      <button class="auth-btn" id="btn-start-verify" style="margin-top:24px">
         Start verification →
       </button>
       <div class="auth-divider"><a href="/" class="auth-link">Skip for now</a></div>
@@ -83,19 +83,19 @@
 
       <!-- Action buttons -->
       <div id="btnOpenCamera" style="padding:0 0 8px">
-        <button class="auth-btn" onclick="openCamera()">
+        <button class="auth-btn" id="btn-open-camera">
           <i class="ti ti-video"></i> Open camera
         </button>
       </div>
       <div id="btnRecord" hidden style="padding:0 0 8px">
-        <button class="auth-btn auth-btn-red" id="recordBtn" onclick="toggleRec()">
+        <button class="auth-btn auth-btn-red" id="recordBtn" id="btn-toggle-rec">
           <i class="ti ti-circle"></i> Start recording
         </button>
       </div>
       <div id="btnRetake" hidden style="padding:0 0 8px">
         <div class="btn-row">
-          <button class="auth-btn auth-btn-outline" onclick="retake()" style="flex:1">Retake</button>
-          <button class="auth-btn" onclick="submitVideo()" id="submitBtn" style="flex:2">
+          <button class="auth-btn auth-btn-outline" id="btn-retake" style="flex:1">Retake</button>
+          <button class="auth-btn"  id="submitBtn" style="flex:2">
             <span id="submitLabel">Submit</span>
             <span id="submitSpinner" class="spinner" hidden></span>
           </button>

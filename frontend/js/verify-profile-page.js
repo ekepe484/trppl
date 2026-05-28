@@ -240,3 +240,23 @@
     document.getElementById('submitSpinner').hidden = !on;
   }
 })();
+
+// ── Wire up buttons ───────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+  var btn;
+
+  btn = document.getElementById('btn-start-verify');
+  if (btn) btn.addEventListener('click', function () { startVerification(); });
+
+  btn = document.getElementById('btn-open-camera');
+  if (btn) btn.addEventListener('click', function () { openVerifyCamera(); });
+
+  btn = document.getElementById('btn-toggle-rec');
+  if (btn) btn.addEventListener('click', function () { toggleVerifyRec(); });
+
+  btn = document.getElementById('btn-retake');
+  if (btn) btn.addEventListener('click', function () { retakeVerify(); });
+
+  btn = document.getElementById('submitBtn');
+  if (btn) btn.addEventListener('click', function () { submitVerify(); });
+});
