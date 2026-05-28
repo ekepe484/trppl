@@ -19,8 +19,18 @@
 <body>
 <div class="phone auth-phone">
   <div class="auth-header">
-    <div class="nav-brand">TRPPL</div>
-    <div class="nav-tagline">match · compete · date</div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:0">
+  <svg width="72" height="52" viewBox="0 0 680 280" role="img" xmlns="http://www.w3.org/2000/svg" aria-label="Trppl logo">
+    <polygon points="248,228 308,112 368,228" fill="#f472b6"/>
+    <polygon points="312,228 372,112 432,228" fill="#38bdf8"/>
+    <polygon points="280,228 340,84 400,228" fill="#7c3aed"/>
+    <polygon points="315,160 340,104 365,160" fill="#a78bfa" opacity="0.3"/>
+    <circle cx="310" cy="178" r="4" fill="#fff" opacity="0.55"/>
+    <circle cx="370" cy="178" r="4" fill="#fff" opacity="0.55"/>
+  </svg>
+  <div style="color:#fff;font-size:22px;font-weight:800;letter-spacing:0.22em;line-height:1">TRPPL</div>
+  <div style="color:#a78bfa;font-size:11px;letter-spacing:0.18em;margin-top:4px">match · compete · date</div>
+</div>
   </div>
 
   <div class="auth-body">
@@ -62,78 +72,6 @@
 
 <script src="/js/auth.js"></script>
 <script src="/js/sw-register.js"></script>
-<script>
-(function () {
-  if (Auth.getToken()) window.location.href = '/';
-
-  let loginMode = 'email';
-
-  window.setMode = function(mode) {
-    loginMode = mode;
-    document.getElementById('ltog-email').classList.toggle('active', mode === 'email');
-    document.getElementById('ltog-phone').classList.toggle('active', mode === 'phone');
-    const inp  = document.getElementById('contact');
-    const lbl  = document.getElementById('contactLabel');
-    const icon = document.getElementById('contactIcon');
-    if (mode === 'email') {
-      inp.type = 'email'; inp.placeholder = 'you@example.com'; inp.autocomplete = 'email';
-      lbl.textContent = 'Email address'; icon.className = 'ti ti-mail field-icon';
-    } else {
-      inp.type = 'tel'; inp.placeholder = '+44 7700 900000'; inp.autocomplete = 'tel';
-      lbl.textContent = 'Phone number'; icon.className = 'ti ti-phone field-icon';
-    }
-    inp.value = '';
-  };
-
-  window.togglePw = function() {
-    const inp = document.getElementById('password');
-    const ico = document.getElementById('pwIcon');
-    inp.type  = inp.type === 'password' ? 'text' : 'password';
-    ico.className = inp.type === 'password' ? 'ti ti-eye' : 'ti ti-eye-off';
-  };
-
-  window.doLogin = async function() {
-    const contact  = document.getElementById('contact').value.trim();
-    const password = document.getElementById('password').value;
-    const fe = document.getElementById('formError');
-    fe.hidden = true;
-
-    if (!contact || !password) { fe.textContent = 'Please enter your credentials.'; fe.hidden = false; return; }
-
-    setLoading(true);
-    try {
-      const data = await Auth.login({ contact, password });
-
-      // Route based on verification state
-      if (!data.user.emailVerified && !data.user.phoneVerified) {
-        const method = data.user.contactMethod || 'email';
-        sessionStorage.setItem('otp_contact', method === 'email' ? data.user.email : data.user.phone);
-        sessionStorage.setItem('otp_method',  method);
-        sessionStorage.setItem('otp_purpose', 'register');
-        sessionStorage.setItem('otp_masked',  method === 'email' ? data.user.email : data.user.phone);
-        window.location.href = '/pages/verify-otp.html';
-        return;
-      }
-      if (!data.user.profileVerified && data.user.verificationStatus !== 'processing' && data.user.verificationStatus !== 'pending') {
-        window.location.href = '/pages/verify-profile.html';
-        return;
-      }
-      window.location.href = '/';
-    } catch (err) {
-      fe.textContent = err.message || 'Invalid credentials.'; fe.hidden = false;
-      setLoading(false);
-    }
-  };
-
-  function setLoading(on) {
-    document.getElementById('loginBtn').disabled = on;
-    document.getElementById('loginLabel').hidden  = on;
-    document.getElementById('loginSpinner').hidden = !on;
-  }
-
-  // Allow Enter key
-  document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-})();
-</script>
+<script src="/js/login-page.js"></script>
 </body>
 </html>

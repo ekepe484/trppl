@@ -43,6 +43,22 @@ function errorHandler(err, req, res, next) {
   res.status(status).json({ error: message });
 }
 
-const helmetOptions = config.isDev ? { contentSecurityPolicy: false } : {};
+const helmetOptions = {
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc:     ["'self'"],
+      scriptSrc:      ["'self'"],
+      styleSrc:       ["'self'", "https://cdn.jsdelivr.net", "'unsafe-inline'"],
+      fontSrc:        ["'self'", "https://cdn.jsdelivr.net"],
+      imgSrc:         ["'self'", "data:", "blob:"],
+      mediaSrc:       ["'self'", "blob:"],
+      connectSrc:     ["'self'"],
+      workerSrc:      ["'self'", "blob:"],
+      frameSrc:       ["'none'"],
+      objectSrc:      ["'none'"],
+      upgradeInsecureRequests: [],
+    },
+  },
+};
 
 module.exports = { corsOptions, triviaLimiter, apiLimiter, authLimiter, errorHandler, helmetOptions };
