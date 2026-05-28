@@ -15,10 +15,17 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
+// Extracts clean IP from Azure's load balancer which appends port numbers
+function getClientIp(req) {
+  const raw = req.ip || req.socket.remoteAddress || '';
+  return raw.replace(/:\d+$/, '').replace(/^::ffff:/, '');
+}
+
 const triviaLimiter = rateLimit({
   windowMs: config.rateLimit.trivia.windowMs,
   max: config.rateLimit.trivia.max,
   standardHeaders: true, legacyHeaders: false,
+  keyGenerator: getClientIp,
   message: { error: 'Too many trivia requests. Please wait.' },
 });
 
@@ -26,6 +33,7 @@ const authLimiter = rateLimit({
   windowMs: config.rateLimit.auth.windowMs,
   max: config.rateLimit.auth.max,
   standardHeaders: true, legacyHeaders: false,
+  keyGenerator: getClientIp,
   message: { error: 'Too many auth attempts. Please wait 15 minutes.' },
 });
 
@@ -33,6 +41,7 @@ const apiLimiter = rateLimit({
   windowMs: config.rateLimit.api.windowMs,
   max: config.rateLimit.api.max,
   standardHeaders: true, legacyHeaders: false,
+  keyGenerator: getClientIp,
   message: { error: 'Too many requests. Please slow down.' },
 });
 
