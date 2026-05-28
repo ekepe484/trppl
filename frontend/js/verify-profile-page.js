@@ -249,14 +249,14 @@ document.addEventListener('DOMContentLoaded', function () {
   if (btn) btn.addEventListener('click', function () { startVerification(); });
 
   btn = document.getElementById('btn-open-camera');
-  if (btn) btn.addEventListener('click', function () { openVerifyCamera(); });
+  if (btn) btn.addEventListener('click', function () { openCamera(); });
 
-  btn = document.getElementById('btn-toggle-rec');
-  if (btn) btn.addEventListener('click', function () { toggleVerifyRec(); });
+  btn = document.getElementById('recordBtn');
+  if (btn) btn.addEventListener('click', function () { toggleRec(); });
 
   btn = document.getElementById('btn-retake');
-  if (btn) btn.addEventListener('click', function () { retakeVerify(); });
+  if (btn) btn.addEventListener('click', function () { retake(); });
 
   btn = document.getElementById('submitBtn');
-  if (btn) btn.addEventListener('click', function () { submitVerify(); });
+  if (btn) btn.addEventListener('click', function () { submitVideo(); });
 });
