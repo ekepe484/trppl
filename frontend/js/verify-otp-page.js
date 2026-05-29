@@ -1,191 +1,175 @@
 // verify-otp-page.js
 
-(function () {
-  const contact = sessionStorage.getItem('otp_contact')  || '';
-  const method  = sessionStorage.getItem('otp_method')   || 'email';
-  const purpose = sessionStorage.getItem('otp_purpose')  || 'register';
-  const masked  = sessionStorage.getItem('otp_masked')   || contact;
+var otpContact = sessionStorage.getItem('otp_contact') || '';
+var otpMethod  = sessionStorage.getItem('otp_method')  || 'email';
+var otpPurpose = sessionStorage.getItem('otp_purpose') || 'register';
+var otpMasked  = sessionStorage.getItem('otp_masked')  || otpContact;
 
-  // Update UI based on method
-  document.getElementById('methodIcon').textContent = method === 'phone' ? '📱' : '📧';
-  document.getElementById('otpSub').textContent =
-    method === 'phone'
-      ? `We sent a 6-digit code to ${masked}. Enter it below to verify your account.`
-      : `We sent a 6-digit code to ${masked}. Enter it below to verify your account.`;
+// Update header icon and subtitle
+var methodIconEl = document.getElementById('methodIcon');
+if (methodIconEl) methodIconEl.textContent = otpMethod === 'phone' ? '📱' : '📧';
 
-  // ── OTP input behaviour ───────────────────────────────────────────────────
-  const digits = Array.from({ length: 6 }, (_, i) => document.getElementById('d' + i));
+var otpSubEl = document.getElementById('otpSub');
+if (otpSubEl) otpSubEl.textContent = 'We sent a 6-digit code to ' + otpMasked + '. Enter it below to verify your account.';
 
-  digits.forEach((inp, i) => {
-    inp.addEventListener('input', (e) => {
-      // Only keep single digit
-      const val = e.target.value.replace(/\D/g, '').slice(-1);
-      e.target.value = val;
-      if (val) {
-        inp.classList.add('filled');
-        inp.classList.remove('error');
-        if (i < 5) digits[i + 1].focus();
-        else autoSubmit();
-      } else {
-        inp.classList.remove('filled');
-      }
-    });
+// ── OTP digit inputs ───────────────────────────────────────────────────────────
+var digits = [0,1,2,3,4,5].map(function(i) { return document.getElementById('d' + i); }).filter(Boolean);
 
-    inp.addEventListener('keydown', (e) => {
-      if (e.key === 'Backspace' && !inp.value && i > 0) {
-        digits[i - 1].value = '';
-        digits[i - 1].classList.remove('filled');
-        digits[i - 1].focus();
-      }
-      // Block non-numeric
-      if (!/^\d$/.test(e.key) && !['Backspace','Tab','ArrowLeft','ArrowRight','Delete'].includes(e.key)) {
-        e.preventDefault();
-      }
-    });
-
-    inp.addEventListener('paste', (e) => {
-      e.preventDefault();
-      const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
-      pasted.split('').forEach((ch, idx) => {
-        if (idx < 6) {
-          digits[idx].value = ch;
-          digits[idx].classList.add('filled');
-        }
-      });
-      if (pasted.length === 6) autoSubmit();
-      else digits[Math.min(pasted.length, 5)].focus();
-    });
+digits.forEach(function(inp, i) {
+  inp.addEventListener('input', function(e) {
+    var val = e.target.value.replace(/\D/g, '').slice(-1);
+    e.target.value = val;
+    if (val) {
+      inp.classList.add('filled');
+      inp.classList.remove('error');
+      if (i < 5) digits[i + 1].focus();
+      else { if (getCode().length === 6) verifyCode(); }
+    } else {
+      inp.classList.remove('filled');
+    }
   });
 
-  digits[0].focus();
+  inp.addEventListener('keydown', function(e) {
+    if (e.key === 'Backspace' && !inp.value && i > 0) {
+      digits[i-1].value = '';
+      digits[i-1].classList.remove('filled');
+      digits[i-1].focus();
+    }
+    if (!/^\d$/.test(e.key) && !['Backspace','Tab','ArrowLeft','ArrowRight','Delete'].includes(e.key)) {
+      e.preventDefault();
+    }
+  });
 
-  function getCode() { return digits.map(d => d.value).join(''); }
+  inp.addEventListener('paste', function(e) {
+    e.preventDefault();
+    var pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);
+    pasted.split('').forEach(function(ch, idx) {
+      if (idx < 6 && digits[idx]) { digits[idx].value = ch; digits[idx].classList.add('filled'); }
+    });
+    if (pasted.length === 6) verifyCode();
+    else if (digits[Math.min(pasted.length, 5)]) digits[Math.min(pasted.length, 5)].focus();
+  });
+});
 
-  function setDigitError() { digits.forEach(d => { d.classList.add('error'); d.classList.remove('filled'); }); }
-  function clearDigitError() { digits.forEach(d => d.classList.remove('error')); }
+if (digits[0]) digits[0].focus();
 
-  function autoSubmit() {
-    const code = getCode();
-    if (code.length === 6) verifyCode();
+function getCode() { return digits.map(function(d) { return d.value; }).join(''); }
+
+// ── Countdown ──────────────────────────────────────────────────────────────────
+var otpSecs = 10 * 60;
+var countdownInt = setInterval(function() {
+  otpSecs--;
+  var m = Math.floor(otpSecs / 60);
+  var s = otpSecs % 60;
+  var el = document.getElementById('countdownVal');
+  if (el) el.textContent = m + ':' + String(s).padStart(2, '0');
+  if (otpSecs <= 0) {
+    clearInterval(countdownInt);
+    var cdEl = document.getElementById('countdown');
+    if (cdEl) cdEl.textContent = 'Code has expired. Request a new one.';
+    var vb = document.getElementById('verifyBtn');
+    if (vb) vb.disabled = true;
   }
+}, 1000);
 
-  // ── Countdown timer ───────────────────────────────────────────────────────
-  let secs = 10 * 60;
-  let resendCooldown = 60;
-  const countdownEl = document.getElementById('countdownVal');
-
-  const countdownInt = setInterval(() => {
-    secs--;
-    if (secs <= 0) {
-      clearInterval(countdownInt);
-      document.getElementById('countdown').textContent = 'Code has expired. Please request a new one.';
-      document.getElementById('verifyBtn').disabled = true;
-    } else {
-      const m = Math.floor(secs / 60);
-      const s = secs % 60;
-      countdownEl.textContent = `${m}:${String(s).padStart(2, '0')}`;
+// Resend cooldown — only starts after user clicks Resend, not on page load
+var resendCooldownInt = null;
+function startResendCooldown() {
+  var resendBtn = document.getElementById('resendBtn');
+  var resendLbl = document.getElementById('resendLabel');
+  var cooldown  = 60;
+  if (resendBtn) resendBtn.disabled = true;
+  if (resendLbl) resendLbl.textContent = 'Resend in 60s';
+  resendCooldownInt = setInterval(function() {
+    cooldown--;
+    if (resendLbl) resendLbl.textContent = cooldown > 0 ? 'Resend in ' + cooldown + 's' : 'Resend code';
+    if (cooldown <= 0) {
+      clearInterval(resendCooldownInt);
+      if (resendBtn) resendBtn.disabled = false;
     }
   }, 1000);
+}
 
-  // Resend cooldown
-  let resendInt = null;
-  function startResendCooldown() {
-    resendCooldown = 60;
-    document.getElementById('resendBtn').disabled = true;
-    document.getElementById('resendLabel').textContent = `Resend in ${resendCooldown}s`;
-    resendInt = setInterval(() => {
-      resendCooldown--;
-      document.getElementById('resendLabel').textContent = resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend code';
-      if (resendCooldown <= 0) {
-        clearInterval(resendInt);
-        document.getElementById('resendBtn').disabled = false;
-      }
-    }, 1000);
+// ── Verify ─────────────────────────────────────────────────────────────────────
+function verifyCode() {
+  var code = getCode();
+  if (code.length < 6) {
+    showError('Please enter all 6 digits.');
+    return;
   }
+  setLoading('verify', true);
+  clearMessages();
 
-  // ── Verify ────────────────────────────────────────────────────────────────
-  window.verifyCode = async function() {
-    const code = getCode();
-    if (code.length < 6) {
-      showError('Please enter all 6 digits.');
-      digits[code.length] && digits[code.length].focus();
-      return;
-    }
-
-    setLoading('verify', true);
-    clearError();
-
-    try {
-      const data = await Auth.verifyOtp({ contact, code, purpose });
-
+  Auth.verifyOtp({ contact: otpContact, code: code, purpose: otpPurpose })
+    .then(function(data) {
       clearInterval(countdownInt);
       showSuccess('✅ ' + (data.message || 'Verified! Redirecting…'));
-
-      setTimeout(() => {
-        // After registration, go to identity verification
-        // After login OTP, go to app
-        if (purpose === 'register') {
-          window.location.href = '/pages/verify-profile.html';
-        } else {
-          window.location.href = '/';
-        }
+      setTimeout(function() {
+        window.location.href = otpPurpose === 'register' ? '/pages/verify-profile.html' : '/';
       }, 1200);
-    } catch (err) {
-      setDigitError();
+    })
+    .catch(function(err) {
+      digits.forEach(function(d) { d.classList.add('error'); d.classList.remove('filled'); });
       showError(err.message || 'Incorrect code. Please try again.');
       setLoading('verify', false);
-    }
-  };
+    });
+}
 
-  // ── Resend ────────────────────────────────────────────────────────────────
-  window.resendCode = async function() {
-    setLoading('resend', true);
-    clearError();
-    try {
-      await Auth.resendOtp({ contact, purpose });
-      showSuccess('New code sent! Check your ' + (method === 'phone' ? 'phone' : 'email') + '.');
-      secs = 10 * 60; // reset countdown
+// ── Resend ─────────────────────────────────────────────────────────────────────
+function resendCode() {
+  setLoading('resend', true);
+  clearMessages();
+
+  Auth.resendOtp({ contact: otpContact, purpose: otpPurpose })
+    .then(function() {
+      showSuccess('New code sent! Check your ' + (otpMethod === 'phone' ? 'phone' : 'email') + '.');
+      otpSecs = 10 * 60;
+      digits.forEach(function(d) { d.value = ''; d.classList.remove('filled','error'); });
+      if (digits[0]) digits[0].focus();
       startResendCooldown();
-      digits.forEach(d => { d.value = ''; d.classList.remove('filled','error'); });
-      digits[0].focus();
-    } catch (err) {
+    })
+    .catch(function(err) {
       showError(err.message || 'Could not resend. Please try again.');
-    } finally {
+    })
+    .finally(function() {
       setLoading('resend', false);
-    }
-  };
+    });
+}
 
-  function showError(msg) {
-    const e = document.getElementById('formError');
-    e.textContent = msg; e.hidden = false;
-    document.getElementById('formSuccess').hidden = true;
-  }
-  function showSuccess(msg) {
-    const e = document.getElementById('formSuccess');
-    e.textContent = msg; e.hidden = false;
-    document.getElementById('formError').hidden = true;
-  }
-  function clearError() {
-    document.getElementById('formError').hidden = true;
-    document.getElementById('formSuccess').hidden = true;
-    clearDigitError();
-  }
-  function setLoading(btn, on) {
-    document.getElementById(btn + 'Btn').disabled = on;
-    document.getElementById(btn + 'Label').hidden  = on;
-    document.getElementById(btn + 'Spinner').hidden = !on;
-  }
+// ── UI helpers ─────────────────────────────────────────────────────────────────
+function showError(msg) {
+  var e = document.getElementById('formError');
+  var s = document.getElementById('formSuccess');
+  if (e) { e.textContent = msg; e.hidden = false; }
+  if (s) s.hidden = true;
+}
+function showSuccess(msg) {
+  var s = document.getElementById('formSuccess');
+  var e = document.getElementById('formError');
+  if (s) { s.textContent = msg; s.hidden = false; }
+  if (e) e.hidden = true;
+}
+function clearMessages() {
+  var e = document.getElementById('formError');
+  var s = document.getElementById('formSuccess');
+  if (e) e.hidden = true;
+  if (s) s.hidden = true;
+  digits.forEach(function(d) { d.classList.remove('error'); });
+}
+function setLoading(btn, on) {
+  var btnEl = document.getElementById(btn + 'Btn');
+  var lblEl = document.getElementById(btn + 'Label');
+  var spnEl = document.getElementById(btn + 'Spinner');
+  if (btnEl) btnEl.disabled = on;
+  if (lblEl) lblEl.hidden   = on;
+  if (spnEl) spnEl.hidden   = !on;
+}
 
-  startResendCooldown();
-})();
+// ── Wire buttons ───────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  var vb = document.getElementById('verifyBtn');
+  if (vb) vb.addEventListener('click', verifyCode);
 
-// ── Wire up buttons ───────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', function () {
-  var btn;
-
-  btn = document.getElementById('otpVerifyBtn');
-  if (btn) btn.addEventListener('click', function () { verifyOtp(); });
-
-  btn = document.getElementById('otpResendBtn');
-  if (btn) btn.addEventListener('click', function () { resendOtp(); });
+  var rb = document.getElementById('resendBtn');
+  if (rb) rb.addEventListener('click', resendCode);
 });
