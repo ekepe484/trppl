@@ -37,10 +37,12 @@ const upload = multer({
   storage,
   limits: { fileSize: config.uploads.maxSize },
   fileFilter: (_req, file, cb) => {
-    // Accept any video MIME type, or octet-stream (Safari sometimes sends this)
-    const isVideo = file.mimetype.startsWith('video/') ||
-                    file.mimetype === 'application/octet-stream';
-    if (isVideo) return cb(null, true);
+    // Accept any video MIME type, octet-stream, or text/plain
+    // (Chrome/Mac sometimes sends video blobs labelled as text/plain)
+    const ok = file.mimetype.startsWith('video/') ||
+               file.mimetype === 'application/octet-stream' ||
+               file.mimetype === 'text/plain';
+    if (ok) return cb(null, true);
     cb(new Error('Only video files accepted. Got: ' + file.mimetype), false);
   },
 });

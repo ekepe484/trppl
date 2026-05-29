@@ -130,9 +130,22 @@ function submitVideo() {
   setSubmitLoading(true);
   hideError();
 
+  // Detect the actual MIME type from what MediaRecorder used
+  var mimeType = (mediaRecorder && mediaRecorder.mimeType) ? mediaRecorder.mimeType : '';
+  // Normalise to a clean type Chrome/Safari will accept
+  var cleanMime = 'video/webm';
+  var ext       = 'webm';
+  if (mimeType.includes('mp4') || mimeType.includes('avc') || mimeType.includes('h264')) {
+    cleanMime = 'video/mp4'; ext = 'mp4';
+  } else if (mimeType.includes('quicktime')) {
+    cleanMime = 'video/mp4'; ext = 'mp4';
+  }
+
+  // Re-create blob with explicit MIME type so FormData sends the right Content-Type
+  var typedBlob = new Blob(recordedChunks, { type: cleanMime });
+
   var formData = new FormData();
-  var ext = videoBlob.type.includes('mp4') ? 'mp4' : 'webm';
-  formData.append('video', videoBlob, 'liveness.' + ext);
+  formData.append('video', typedBlob, 'liveness.' + ext);
 
   var uploadWrap = document.getElementById('uploadWrap');
   var uploadBar  = document.getElementById('uploadBar');
