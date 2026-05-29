@@ -39,6 +39,10 @@ setInterval(updateClock, 30000);
   buildFilteredProfiles();
   showProfile(0);
 
+  // Load active trppl and notifications
+  loadActiveTrppl();
+  loadNotifications();
+
   // Show verified badge if approved
   if (user.profileVerified) showVerifiedBadge();
 
@@ -208,13 +212,47 @@ function exitGame() {
   el('gamesList').style.display = 'block'; renderGames();
 }
 function showGameResult(elId, won, detail, gameId) {
+  // Submit result to backend if we have an active trppl
+  if (activeTrpplId) {
+    var headers = { 'Content-Type': 'application/json' };
+    var token = Auth.getToken();
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    fetch('/api/matches/trppl/' + activeTrpplId + '/game-result', {
+      method:  'POST',
+      headers: headers,
+      body:    JSON.stringify({ gameType: gameId, won: won }),
+    }).then(function(r) { return r.json(); })
+      .then(function(data) { console.log('[Game] Result saved:', data.message); })
+      .catch(function(err) { console.warn('[Game] Could not save result:', err.message); });
+  }
+
   el(elId).innerHTML =
     '<div class="gresult">' +
     '<div class="grtitle">' + (won ? 'You win! 🎉' : 'You lost 😞') + '</div>' +
     '<div class="grsub">' + detail + '</div>' +
-    '<div class="grdetail">' + (won ? 'James heads to the 7-day waiting room.<br>You have 5 days to book a date.' : "You're in the 7-day waiting room.<br>Go Premium to skip the queue.") + '</div>' +
-    (won ? '<button class="gbtn gbtn-green" onclick="alert(\'Date booking coming soon! 💕\')" style="margin-bottom:10px">Book the date 💕</button>' : '') +
+    '<div class="grdetail">' + (won
+      ? 'James heads to the 7-day waiting room.<br>You have 5 days to book a date.'
+      : "You're in the 7-day waiting room.<br>Go Premium to skip the queue.") + '</div>' +
+    (won ? '<a href="/pages/book-date.html" class="gbtn gbtn-green" style="display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;margin-bottom:10px;border-radius:var(--rad)"><i class="ti ti-heart"></i> Book the date 💕</a>' : '') +
     '<button class="gbtn gbtn-secondary" onclick="launchGame(\'' + gameId + '\')">Play Again</button></div>';
+}
+
+// Active trppl ID (set when user has a real trppl)
+var activeTrpplId = null;
+
+// Load active trppl on boot
+async function loadActiveTrppl() {
+  var token = Auth.getToken();
+  if (!token) return;
+  try {
+    var res  = await fetch('/api/matches/trppl', { headers: { Authorization: 'Bearer ' + token } });
+    var data = await res.json();
+    var user = Auth.getUser();
+    var active = (data.trppls || []).find(function(t) {
+      return (t.comp1_user_id === user.id || t.comp2_user_id === user.id) && t.status !== 'completed';
+    });
+    if (active) activeTrpplId = active.id;
+  } catch (e) { /* non-critical */ }
 }
 
 // Wiring
@@ -278,8 +316,11 @@ function dismissInstall() { localStorage.setItem('pwa_dismissed','1'); const b=e
 
 // ── Wire all buttons via addEventListener (CSP-safe, no onclick attrs) ─────────
 document.addEventListener('DOMContentLoaded', function () {
-  // Tabs
-  var tabs = [
+  // Nav avatar → profile page
+  var avatarBtn = document.getElementById('navAvatar');
+  if (avatarBtn) avatarBtn.addEventListener('click', function () {
+    window.location.href = '/pages/profile.html';
+  });
     { id: 'tab-discover',  tab: 'discover'  },
     { id: 'tab-notifs',    tab: 'notifs'    },
     { id: 'tab-trppl',     tab: 'trppl'     },
@@ -320,3 +361,90 @@ document.addEventListener('DOMContentLoaded', function () {
   b = document.getElementById('btn-sc-clear'); if (b) b.addEventListener('click', scClear);
   b = document.getElementById('btn-sc-submit');if (b) b.addEventListener('click', scSubmit);
 });
+
+// ── Notifications ─────────────────────────────────────────────────────────────
+async function loadNotifications() {
+  var token = Auth.getToken();
+  if (!token) return;
+  try {
+    var res  = await fetch('/api/notifications', { headers: { Authorization: 'Bearer ' + token } });
+    var data = await res.json();
+    var unread = data.unreadCount || 0;
+
+    // Update tab badge
+    var notifTab = document.getElementById('tab-notifs');
+    if (notifTab) {
+      var badge = notifTab.querySelector('.notif-badge');
+      if (!badge && unread > 0) {
+        badge = document.createElement('span');
+        badge.className = 'notif-badge';
+        badge.style.cssText = 'position:absolute;top:4px;right:50%;transform:translateX(200%);background:#dc2626;color:#fff;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;line-height:1';
+        notifTab.style.position = 'relative';
+        notifTab.appendChild(badge);
+      }
+      if (badge) {
+        badge.textContent = unread > 9 ? '9+' : unread;
+        badge.style.display = unread > 0 ? 'flex' : 'none';
+      }
+    }
+
+    // Render real notifications in the alerts tab
+    if (data.notifications && data.notifications.length) {
+      renderNotifications(data.notifications);
+    }
+  } catch (e) { /* non-critical */ }
+}
+
+function renderNotifications(notifications) {
+  var card = document.querySelector('#notifs .card');
+  if (!card) return;
+
+  var icons = {
+    match:          { cls: 'nim', icon: 'ti-sparkles' },
+    trppl:          { cls: 'nio', icon: 'ti-sword'    },
+    win:            { cls: 'nig', icon: 'ti-trophy'   },
+    loss:           { cls: 'niw', icon: 'ti-clock'    },
+    date_request:   { cls: 'nim', icon: 'ti-heart'    },
+    date_accepted:  { cls: 'nig', icon: 'ti-check'    },
+    date_declined:  { cls: 'niw', icon: 'ti-x'        },
+    date_cancelled: { cls: 'niw', icon: 'ti-ban'      },
+    date_completed: { cls: 'nig', icon: 'ti-star'     },
+    date_incoming:  { cls: 'nim', icon: 'ti-calendar' },
+  };
+
+  card.innerHTML = notifications.slice(0, 20).map(function(n) {
+    var ico = icons[n.type] || { cls: 'nim', icon: 'ti-bell' };
+    var time = timeAgo(new Date(n.created_at));
+    var unreadStyle = n.read ? '' : 'background:var(--pl);';
+    return '<div class="notif" style="' + unreadStyle + '">' +
+      '<div class="nic ' + ico.cls + '"><i class="ti ' + ico.icon + '"></i></div>' +
+      '<div>' +
+      '<div class="ntitle">' + n.title + '</div>' +
+      '<div class="nbody">' + n.body + '</div>' +
+      '<div class="ntime">' + time + '</div>' +
+      '</div></div>';
+  }).join('');
+}
+
+function timeAgo(date) {
+  var secs = Math.floor((new Date() - date) / 1000);
+  if (secs < 60) return 'just now';
+  if (secs < 3600) return Math.floor(secs / 60) + ' min ago';
+  if (secs < 86400) return Math.floor(secs / 3600) + 'h ago';
+  return Math.floor(secs / 86400) + 'd ago';
+}
+
+// Mark all read when opening notifications tab
+var origShowTab = showTab;
+window.showTab = function(id, tabEl) {
+  origShowTab(id, tabEl);
+  if (id === 'notifs') {
+    var token = Auth.getToken();
+    if (token) fetch('/api/notifications/read', { method: 'PUT', headers: { Authorization: 'Bearer ' + token } });
+    var badge = document.querySelector('.notif-badge');
+    if (badge) badge.style.display = 'none';
+  }
+};
+
+// Poll for new notifications every 60 seconds
+setInterval(loadNotifications, 60000);

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" type="image/png" href="/favicon.png">
+<title>Book a Date — Trppl</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/auth.css">
+<link rel="stylesheet" href="/css/register.css">
+<style>
+.date-type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+.date-type-btn{aspect-ratio:1;border-radius:var(--rad);border:2px solid var(--br2);background:var(--bg2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:all .15s;padding:8px;}
+.date-type-btn:active{transform:scale(.95);}
+.date-type-btn.sel{border-color:var(--p);background:var(--pl);}
+.date-type-btn .dt-icon{font-size:28px;}
+.date-type-btn .dt-name{font-size:11px;font-weight:600;color:var(--tx);text-align:center;}
+.date-type-btn.sel .dt-name{color:var(--pd);}
+.winner-banner{background:linear-gradient(135deg,#7c3aed,#ec4899);border-radius:var(--rad);padding:20px;margin-bottom:20px;text-align:center;color:#fff;}
+.winner-banner h2{font-size:20px;font-weight:800;margin-bottom:4px;}
+.winner-banner p{font-size:13px;opacity:.85;}
+.deadline-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.2);border-radius:20px;padding:4px 12px;font-size:12px;margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="phone auth-phone">
+  <div style="background:#1a1a2e;padding:14px 16px;display:flex;justify-content:space-between;align-items:center">
+    <button id="backBtn" style="background:transparent;border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:var(--font);font-size:14px">
+      <i class="ti ti-arrow-left"></i> Back
+    </button>
+    <div style="color:#a78bfa;font-size:12px;font-weight:600">BOOK A DATE</div>
+  </div>
+
+  <div class="auth-body">
+    <div id="loadingState" style="text-align:center;padding:40px 0">
+      <div class="spinner" style="width:32px;height:32px;border-width:3px;border-color:var(--pl);border-top-color:var(--p);margin:0 auto 12px"></div>
+      <div style="font-size:14px;color:var(--tx2)">Loading your Trppl win…</div>
+    </div>
+
+    <div id="bookingForm" style="display:none">
+      <div class="winner-banner">
+        <div style="font-size:40px;margin-bottom:8px">🏆</div>
+        <h2>You won the Trppl!</h2>
+        <p id="winnerSubtitle">Book a date with your match</p>
+        <div class="deadline-badge" id="deadlineBadge">
+          <i class="ti ti-clock"></i> <span id="deadlineText">5 days to book</span>
+        </div>
+      </div>
+
+      <div id="formError" class="auth-error" hidden></div>
+      <div id="formSuccess" class="auth-success" hidden></div>
+
+      <div class="field">
+        <label class="field-label">Type of date</label>
+        <div class="date-type-grid" id="dateTypeGrid">
+          <button class="date-type-btn" data-type="coffee"><span class="dt-icon">☕</span><span class="dt-name">Coffee</span></button>
+          <button class="date-type-btn" data-type="dinner"><span class="dt-icon">🍽️</span><span class="dt-name">Dinner</span></button>
+          <button class="date-type-btn" data-type="drinks"><span class="dt-icon">🍹</span><span class="dt-name">Drinks</span></button>
+          <button class="date-type-btn" data-type="activity"><span class="dt-icon">🎯</span><span class="dt-name">Activity</span></button>
+          <button class="date-type-btn" data-type="virtual"><span class="dt-icon">💻</span><span class="dt-name">Virtual</span></button>
+        </div>
+        <div class="field-error" id="err-dateType"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="proposedDate">Date</label>
+        <div class="field-wrap">
+          <i class="ti ti-calendar field-icon"></i>
+          <input class="field-input" id="proposedDate" type="date">
+        </div>
+        <div class="field-error" id="err-date"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="proposedTime">Time</label>
+        <div class="field-wrap">
+          <i class="ti ti-clock field-icon"></i>
+          <input class="field-input" id="proposedTime" type="time">
+        </div>
+        <div class="field-error" id="err-time"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="location">Location <span style="color:var(--tx3);font-weight:400">(optional)</span></label>
+        <div class="field-wrap">
+          <i class="ti ti-map-pin field-icon"></i>
+          <input class="field-input" id="location" type="text" placeholder="e.g. Central Park, Zoom call…">
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-label" for="message">Message <span style="color:var(--tx3);font-weight:400">(optional)</span></label>
+        <div class="field-wrap" style="align-items:flex-start">
+          <i class="ti ti-message field-icon" style="top:14px;position:absolute"></i>
+          <textarea class="field-input" id="message" rows="3" placeholder="Add a personal note…" style="padding-top:13px;resize:none;padding-left:38px"></textarea>
+        </div>
+      </div>
+
+      <button class="auth-btn" id="submitBtn">
+        <span id="submitLabel"><i class="ti ti-heart"></i> Send date request</span>
+        <span id="submitSpinner" class="spinner" hidden></span>
+      </button>
+    </div>
+
+    <div id="noTrppl" style="display:none;text-align:center;padding:40px 20px">
+      <div style="font-size:52px;margin-bottom:16px">🎮</div>
+      <h2 style="font-size:20px;font-weight:700;color:var(--tx);margin-bottom:8px">No active Trppl win</h2>
+      <p style="font-size:14px;color:var(--tx2);line-height:1.6">You need to win a Trppl game before you can book a date. Head to the Games tab to play!</p>
+      <a href="/" class="auth-btn" style="display:block;text-decoration:none;margin-top:20px">Go to Trppl →</a>
+    </div>
+  </div>
+</div>
+
+<script src="/js/auth.js"></script>
+<script src="/js/book-date.js"></script>
+</body>
+</html>

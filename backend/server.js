@@ -5,33 +5,35 @@ const helmet  = require('helmet');
 const cors    = require('cors');
 
 const config   = require('./config');
-const { corsOptions, apiLimiter, errorHandler, helmetOptions } = require('./middleware');
+const { corsOptions, apiLimiter, errorHandler, helmetOptions, requestLogger } = require('./middleware');
 const { migrate } = require('./db/migrate');
 
-const triviaRouter       = require('./routes/trivia');
-const healthRouter       = require('./routes/health');
-const authRouter         = require('./routes/auth');
-const verificationRouter = require('./routes/verification');
+const triviaRouter        = require('./routes/trivia');
+const healthRouter        = require('./routes/health');
+const authRouter          = require('./routes/auth');
+const verificationRouter  = require('./routes/verification');
+const profileRouter       = require('./routes/profile');
+const matchesRouter       = require('./routes/matches');
+const bookingsRouter      = require('./routes/bookings');
+const notificationsRouter = require('./routes/notifications');
 
 const app = express();
 
 app.use(helmet(helmetOptions));
 app.use(cors(corsOptions));
-app.set('trust proxy', 1); // trust Azure's load balancer / reverse proxy
+app.set('trust proxy', 1);
 app.use(express.json({ limit: '10kb' }));
-
-if (config.isDev) {
-  app.use((req, _res, next) => {
-    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
-    next();
-  });
-}
+app.use(requestLogger);
 
 app.use('/api', apiLimiter);
-app.use('/api/health',       healthRouter);
-app.use('/api/trivia',       triviaRouter);
-app.use('/api/auth',         authRouter);
-app.use('/api/verification', verificationRouter);
+app.use('/api/health',         healthRouter);
+app.use('/api/trivia',         triviaRouter);
+app.use('/api/auth',           authRouter);
+app.use('/api/verification',   verificationRouter);
+app.use('/api/profile',        profileRouter);
+app.use('/api/matches',        matchesRouter);
+app.use('/api/bookings',       bookingsRouter);
+app.use('/api/notifications',  notificationsRouter);
 
 const FRONTEND = path.join(__dirname, '../frontend');
 app.use(express.static(FRONTEND));
