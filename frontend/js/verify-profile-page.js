@@ -1,262 +1,234 @@
-// verify-profile-page.js
+// verify-profile-page.js — identity verification page logic
 
-(function () {
-  if (!Auth.requireAuth()) return;
+if (!Auth.requireAuth()) { /* redirects */ }
 
-  let videoStream    = null;
-  let mediaRecorder  = null;
-  let recordedChunks = [];
-  let videoBlob      = null;
-  let isRecording    = false;
-  let recTimer       = null;
-  let recSecs        = 0;
-  const MAX_SECS     = 30;
+var videoStream    = null;
+var mediaRecorder  = null;
+var recordedChunks = [];
+var videoBlob      = null;
+var isRecording    = false;
+var recTimer       = null;
+var recSecs        = 0;
+var MAX_SECS       = 30;
 
-  // ── Screen switcher ───────────────────────────────────────────────────────
-  function showScreen(id) {
-    document.querySelectorAll('.vscreen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-  }
+function authHeader() {
+  var t = Auth.getToken();
+  return t ? { Authorization: 'Bearer ' + t } : {};
+}
 
-  // ── Intro → Video ─────────────────────────────────────────────────────────
-  window.startVerification = async function() {
-    showScreen('screenVideo');
-    await loadPhrase();
-  };
+// ── Screen switcher ────────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.vscreen').forEach(function(s) { s.classList.remove('active'); });
+  var el = document.getElementById(id);
+  if (el) el.classList.add('active');
+}
 
-  async function loadPhrase() {
-    document.getElementById('phraseLoading').style.display = 'flex';
-    document.getElementById('phraseText').hidden = true;
-    try {
-      const res  = await fetch('/api/verification/phrase', { headers: authHeader() });
-      const data = await res.json();
-      document.getElementById('phraseText').textContent = '"' + data.phrase + '"';
-      document.getElementById('phraseText').hidden = false;
-    } catch {
-      document.getElementById('phraseText').textContent = '"I verify that this is me and I am joining Trppl today."';
-      document.getElementById('phraseText').hidden = false;
-    } finally {
-      document.getElementById('phraseLoading').style.display = 'none';
-    }
-  }
+// ── Start verification ─────────────────────────────────────────────────────────
+function startVerification() {
+  showScreen('screenVideo');
+  loadPhrase();
+}
 
-  function authHeader() {
-    const t = Auth.getToken();
-    return t ? { Authorization: 'Bearer ' + t } : {};
-  }
+function loadPhrase() {
+  var loading = document.getElementById('phraseLoading');
+  var text    = document.getElementById('phraseText');
+  if (loading) loading.style.display = 'flex';
+  if (text)    text.hidden = true;
+  fetch('/api/verification/phrase', { headers: authHeader() })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (text) { text.textContent = '"' + data.phrase + '"'; text.hidden = false; }
+    })
+    .catch(function() {
+      if (text) { text.textContent = '"I verify that this is me and I am joining Trppl today."'; text.hidden = false; }
+    })
+    .finally(function() {
+      if (loading) loading.style.display = 'none';
+    });
+}
 
-  // ── Camera ────────────────────────────────────────────────────────────────
-  window.openCamera = async function() {
-    hideError();
-    try {
-      videoStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user', width: { ideal: 720 }, height: { ideal: 960 } },
-        audio: true,
-      });
-      const vid = document.getElementById('liveVideo');
-      vid.srcObject = videoStream; vid.hidden = false;
-      document.getElementById('videoPreview').hidden = true;
-      document.getElementById('btnOpenCamera').hidden = true;
-      document.getElementById('btnRecord').hidden      = false;
-    } catch {
-      showError('Camera or microphone access was denied. Both are required for verification.');
-    }
-  };
+// ── Open camera ────────────────────────────────────────────────────────────────
+function openCamera() {
+  hideError();
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: 'user', width: { ideal: 720 }, height: { ideal: 960 } },
+    audio: true,
+  })
+  .then(function(stream) {
+    videoStream = stream;
+    var vid = document.getElementById('liveVideo');
+    if (vid) { vid.srcObject = stream; vid.hidden = false; }
+    var vp  = document.getElementById('videoPreview');    if (vp)  vp.hidden  = true;
+    var bo  = document.getElementById('btnOpenCamera');   if (bo)  bo.hidden  = true;
+    var br  = document.getElementById('btnRecord');       if (br)  br.hidden  = false;
+  })
+  .catch(function() {
+    showError('Camera or microphone access was denied. Both are required for verification.');
+  });
+}
 
-  window.toggleRec = function() { isRecording ? stopRec() : startRec(); };
+// ── Recording ──────────────────────────────────────────────────────────────────
+function toggleRec() {
+  if (isRecording) { stopRec(); } else { startRec(); }
+}
 
-  function startRec() {
-    if (!videoStream) return;
-    recordedChunks = []; isRecording = true; recSecs = 0;
-    const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9'
-               : MediaRecorder.isTypeSupported('video/webm') ? 'video/webm' : 'video/mp4';
-    mediaRecorder = new MediaRecorder(videoStream, { mimeType: mime });
-    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
-    mediaRecorder.onstop = onRecStop;
-    mediaRecorder.start(100);
+function startRec() {
+  if (!videoStream) return;
+  recordedChunks = []; isRecording = true; recSecs = 0;
+  var mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9'
+           : MediaRecorder.isTypeSupported('video/webm') ? 'video/webm' : 'video/mp4';
+  mediaRecorder = new MediaRecorder(videoStream, { mimeType: mime });
+  mediaRecorder.ondataavailable = function(e) { if (e.data.size > 0) recordedChunks.push(e.data); };
+  mediaRecorder.onstop = onRecStop;
+  mediaRecorder.start(100);
 
-    const btn = document.getElementById('recordBtn');
-    btn.innerHTML = '<i class="ti ti-player-stop"></i> Stop recording';
-    btn.className = 'auth-btn auth-btn-outline';
-    document.getElementById('recIndicator').hidden = false;
-    document.getElementById('cameraTimer').hidden  = false;
+  var btn = document.getElementById('recordBtn');
+  if (btn) { btn.innerHTML = '<i class="ti ti-player-stop"></i> Stop recording'; btn.className = 'auth-btn auth-btn-outline'; }
+  var ri  = document.getElementById('recIndicator'); if (ri)  ri.hidden  = false;
 
-    recTimer = setInterval(() => {
-      recSecs++;
-      document.getElementById('timerVal').textContent = MAX_SECS - recSecs;
-      if (recSecs >= MAX_SECS) stopRec();
-    }, 1000);
-  }
+  recTimer = setInterval(function() {
+    recSecs++;
+    var tv = document.getElementById('timerVal'); if (tv) tv.textContent = MAX_SECS - recSecs;
+    if (recSecs >= MAX_SECS) stopRec();
+  }, 1000);
+}
 
-  function stopRec() {
-    if (!isRecording) return;
-    isRecording = false;
-    clearInterval(recTimer);
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
-    document.getElementById('recIndicator').hidden = true;
-    document.getElementById('cameraTimer').hidden  = true;
-  }
+function stopRec() {
+  if (!isRecording) return;
+  isRecording = false;
+  clearInterval(recTimer);
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+  var ri = document.getElementById('recIndicator'); if (ri) ri.hidden = true;
+}
 
-  function onRecStop() {
-    videoBlob = new Blob(recordedChunks, { type: mediaRecorder.mimeType || 'video/webm' });
-    const url  = URL.createObjectURL(videoBlob);
-    const prev = document.getElementById('videoPreview');
-    prev.src = url; prev.hidden = false;
-    document.getElementById('liveVideo').hidden = true;
-    document.getElementById('btnRecord').hidden = true;
-    document.getElementById('btnRetake').hidden = false;
-    if (videoStream) { videoStream.getTracks().forEach(t => t.stop()); videoStream = null; }
-  }
+function onRecStop() {
+  videoBlob = new Blob(recordedChunks, { type: mediaRecorder.mimeType || 'video/webm' });
+  var url  = URL.createObjectURL(videoBlob);
+  var prev = document.getElementById('videoPreview');
+  if (prev) { prev.src = url; prev.hidden = false; }
+  var lv   = document.getElementById('liveVideo');   if (lv)   lv.hidden   = true;
+  var br   = document.getElementById('btnRecord');   if (br)   br.hidden   = true;
+  var bret = document.getElementById('btnRetake');   if (bret) bret.hidden = false;
+  if (videoStream) { videoStream.getTracks().forEach(function(t) { t.stop(); }); videoStream = null; }
+}
 
-  window.retake = function() {
-    videoBlob = null;
-    document.getElementById('videoPreview').hidden = true;
-    document.getElementById('btnRetake').hidden = true;
-    document.getElementById('btnOpenCamera').hidden = false;
-    document.getElementById('liveVideo').hidden = true;
-    document.getElementById('recordBtn').innerHTML = '<i class="ti ti-circle"></i> Start recording';
-    document.getElementById('recordBtn').className = 'auth-btn auth-btn-red';
-    hideError();
-  };
+// ── Retake ─────────────────────────────────────────────────────────────────────
+function retake() {
+  videoBlob = null; recordedChunks = [];
+  var vp  = document.getElementById('videoPreview');  if (vp)   vp.hidden   = true;
+  var br  = document.getElementById('btnRetake');     if (br)   br.hidden   = true;
+  var bo  = document.getElementById('btnOpenCamera'); if (bo)   bo.hidden   = false;
+  var lv  = document.getElementById('liveVideo');     if (lv)   lv.hidden   = true;
+  var btn = document.getElementById('recordBtn');
+  if (btn) { btn.innerHTML = '<i class="ti ti-circle"></i> Start recording'; btn.className = 'auth-btn auth-btn-red'; }
+  hideError();
+}
 
-  // ── Submit ────────────────────────────────────────────────────────────────
-  window.submitVideo = async function() {
-    if (!videoBlob) { showError('Please record your verification video first.'); return; }
+// ── Submit ─────────────────────────────────────────────────────────────────────
+function submitVideo() {
+  if (!videoBlob) { showError('Please record your verification video first.'); return; }
+  setSubmitLoading(true);
+  hideError();
 
-    setSubmitLoading(true);
-    hideError();
+  var formData = new FormData();
+  var ext = videoBlob.type.includes('mp4') ? 'mp4' : 'webm';
+  formData.append('video', videoBlob, 'liveness.' + ext);
 
-    const formData = new FormData();
-    const ext = videoBlob.type.includes('mp4') ? 'mp4' : 'webm';
-    formData.append('video', videoBlob, 'liveness.' + ext);
+  var uploadWrap = document.getElementById('uploadWrap');
+  var uploadBar  = document.getElementById('uploadBar');
+  var uploadLbl  = document.getElementById('uploadLabel');
+  if (uploadWrap) uploadWrap.hidden = false;
+  var progress = 0;
+  var progInt = setInterval(function() {
+    progress = Math.min(progress + Math.random() * 15, 88);
+    if (uploadBar) uploadBar.style.width = progress + '%';
+    if (uploadLbl) uploadLbl.textContent = 'Uploading… ' + Math.round(progress) + '%';
+  }, 200);
 
-    // Fake upload progress
-    const uploadWrap = document.getElementById('uploadWrap');
-    const uploadBar  = document.getElementById('uploadBar');
-    const uploadLbl  = document.getElementById('uploadLabel');
-    uploadWrap.hidden = false;
-    let progress = 0;
-    const progInt = setInterval(() => {
-      progress = Math.min(progress + Math.random() * 15, 88);
-      uploadBar.style.width = progress + '%';
-      uploadLbl.textContent = 'Uploading… ' + Math.round(progress) + '%';
-    }, 200);
-
-    try {
-      const res  = await fetch('/api/verification/submit', {
-        method:  'POST',
-        headers: authHeader(),
-        body:    formData,
-      });
+  fetch('/api/verification/submit', { method: 'POST', headers: authHeader(), body: formData })
+    .then(function(res) {
       clearInterval(progInt);
-      uploadBar.style.width = '100%';
-      uploadLbl.textContent = 'Upload complete!';
-
-      const data = await res.json();
-      if (!res.ok) { showError(data.error || 'Upload failed.'); setSubmitLoading(false); uploadWrap.hidden = true; return; }
-
-      setTimeout(() => {
-        showScreen('screenProcessing');
-        pollStatus();
-      }, 600);
-    } catch (err) {
+      if (uploadBar) uploadBar.style.width = '100%';
+      if (uploadLbl) uploadLbl.textContent = 'Upload complete!';
+      return res.json().then(function(data) { return { ok: res.ok, data: data }; });
+    })
+    .then(function(result) {
+      if (!result.ok) { showError(result.data.error || 'Upload failed.'); setSubmitLoading(false); if (uploadWrap) uploadWrap.hidden = true; return; }
+      setTimeout(function() { showScreen('screenProcessing'); pollStatus(); }, 600);
+    })
+    .catch(function() {
       clearInterval(progInt);
-      uploadWrap.hidden = true;
+      if (uploadWrap) uploadWrap.hidden = true;
       showError('Upload failed. Check your connection and try again.');
       setSubmitLoading(false);
-    }
-  };
+    });
+}
 
-  // ── Poll status ───────────────────────────────────────────────────────────
-  async function pollStatus() {
-    let attempts = 0;
-    const poll = setInterval(async () => {
-      attempts++;
-      try {
-        const res  = await fetch('/api/verification/status', { headers: authHeader() });
-        const data = await res.json();
-
+// ── Poll status ────────────────────────────────────────────────────────────────
+function pollStatus() {
+  var attempts = 0;
+  var poll = setInterval(function() {
+    attempts++;
+    fetch('/api/verification/status', { headers: authHeader() })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
         if (data.verificationStatus === 'approved') {
           clearInterval(poll);
-          await Auth.refreshUser();
-          showResult('approved', data.faceMatchScore);
+          Auth.refreshUser().then(function() { showResult('approved', data.faceMatchScore); });
         } else if (data.verificationStatus === 'rejected') {
-          clearInterval(poll);
-          showResult('rejected');
+          clearInterval(poll); showResult('rejected');
         } else if (data.verificationStatus === 'pending' && attempts > 3) {
-          clearInterval(poll);
-          showResult('pending');
+          clearInterval(poll); showResult('pending');
         }
-      } catch { /* keep polling */ }
-      if (attempts >= 20) { clearInterval(poll); showResult('pending'); }
-    }, 3000);
+      })
+      .catch(function() { /* keep polling */ });
+    if (attempts >= 20) { clearInterval(poll); showResult('pending'); }
+  }, 3000);
+}
+
+function showResult(status, score) {
+  showScreen('screenResult');
+  var card = document.getElementById('resultCard');
+  if (!card) return;
+  if (status === 'approved') {
+    card.innerHTML = '<div style="font-size:60px;margin-bottom:16px">✅</div><h2 class="vcard-title">Identity verified!</h2><p class="vcard-desc">Your face matched your profile photos. You now have a verified badge.</p>' + (score ? '<div style="font-size:13px;color:var(--tx3);margin:8px 0 16px">Face match confidence: <strong>' + Math.round(score) + '%</strong></div>' : '') + '<div class="verify-badge verified"><i class="ti ti-badge-check"></i> Verified</div><a href="/" class="auth-btn" style="display:block;text-decoration:none;margin-top:24px">Go to Trppl →</a>';
+  } else if (status === 'rejected') {
+    card.innerHTML = '<div style="font-size:60px;margin-bottom:16px">❌</div><h2 class="vcard-title">Verification failed</h2><p class="vcard-desc">Your video did not match your profile photos. Please try again with a clearer video in good lighting.</p><button class="auth-btn" id="retryBtn" style="margin-top:20px">Try again</button>';
+    var rb = document.getElementById('retryBtn');
+    if (rb) rb.addEventListener('click', retryVerification);
+  } else {
+    card.innerHTML = '<div style="font-size:60px;margin-bottom:16px">⏳</div><h2 class="vcard-title">Under review</h2><p class="vcard-desc">Your submission is being reviewed. You\'ll be notified once approved — usually within a few hours.</p><div class="verify-badge pending"><i class="ti ti-clock"></i> Pending review</div><a href="/" class="auth-btn" style="display:block;text-decoration:none;margin-top:24px">Go to Trppl →</a>';
   }
+}
 
-  function showResult(status, score) {
-    showScreen('screenResult');
-    const card = document.getElementById('resultCard');
-    if (status === 'approved') {
-      card.innerHTML = `
-        <div style="font-size:60px;margin-bottom:16px">✅</div>
-        <h2 class="vcard-title">Identity verified!</h2>
-        <p class="vcard-desc">Your face matched your profile photos. You now have a verified badge on your profile.</p>
-        ${score ? '<div style="font-size:13px;color:var(--tx3);margin:8px 0 16px">Face match confidence: <strong>' + Math.round(score) + '%</strong></div>' : ''}
-        <div class="verify-badge verified"><i class="ti ti-badge-check"></i> Verified</div>
-        <a href="/" class="auth-btn" style="display:block;text-decoration:none;margin-top:24px">Go to Trppl →</a>`;
-    } else if (status === 'rejected') {
-      card.innerHTML = `
-        <div style="font-size:60px;margin-bottom:16px">❌</div>
-        <h2 class="vcard-title">Verification failed</h2>
-        <p class="vcard-desc">Your video didn't match your profile photos. Please try again with a clearer video in good lighting.</p>
-        <button class="auth-btn" onclick="retryVerification()" style="margin-top:20px">Try again</button>`;
-    } else {
-      card.innerHTML = `
-        <div style="font-size:60px;margin-bottom:16px">⏳</div>
-        <h2 class="vcard-title">Under review</h2>
-        <p class="vcard-desc">Your submission is being reviewed manually. You'll be notified once it's approved — usually within a few hours.</p>
-        <div class="verify-badge pending"><i class="ti ti-clock"></i> Pending review</div>
-        <a href="/" class="auth-btn" style="display:block;text-decoration:none;margin-top:24px">Go to Trppl →</a>`;
-    }
-  }
+function retryVerification() {
+  videoBlob = null; recordedChunks = [];
+  var vp  = document.getElementById('videoPreview');  if (vp)  vp.hidden  = true;
+  var br  = document.getElementById('btnRetake');     if (br)  br.hidden  = true;
+  var bo  = document.getElementById('btnOpenCamera'); if (bo)  bo.hidden  = false;
+  var lv  = document.getElementById('liveVideo');     if (lv)  lv.hidden  = true;
+  var uw  = document.getElementById('uploadWrap');    if (uw)  uw.hidden  = true;
+  var sb  = document.getElementById('submitBtn');     if (sb)  sb.disabled = false;
+  var sl  = document.getElementById('submitLabel');   if (sl)  sl.hidden  = false;
+  var ss  = document.getElementById('submitSpinner'); if (ss)  ss.hidden  = true;
+  showScreen('screenVideo');
+}
 
-  window.retryVerification = function() {
-    videoBlob = null; recordedChunks = [];
-    document.getElementById('videoPreview').hidden = true;
-    document.getElementById('btnRetake').hidden = true;
-    document.getElementById('btnOpenCamera').hidden = false;
-    document.getElementById('liveVideo').hidden = true;
-    document.getElementById('uploadWrap').hidden = true;
-    document.getElementById('submitBtn').disabled = false;
-    document.getElementById('submitLabel').hidden  = false;
-    document.getElementById('submitSpinner').hidden = true;
-    showScreen('screenVideo');
-  };
+// ── UI helpers ─────────────────────────────────────────────────────────────────
+function showError(msg)    { var e = document.getElementById('formError');   if (e) { e.textContent = msg; e.hidden = false; } }
+function hideError()       { var e = document.getElementById('formError');   if (e) e.hidden = true; }
+function setSubmitLoading(on) {
+  var sb = document.getElementById('submitBtn');     if (sb) sb.disabled   = on;
+  var sl = document.getElementById('submitLabel');   if (sl) sl.hidden     = on;
+  var ss = document.getElementById('submitSpinner'); if (ss) ss.hidden     = !on;
+}
 
-  function showError(msg) { const e = document.getElementById('formError'); e.textContent = msg; e.hidden = false; }
-  function hideError()    { document.getElementById('formError').hidden = true; }
-  function setSubmitLoading(on) {
-    document.getElementById('submitBtn').disabled = on;
-    document.getElementById('submitLabel').hidden  = on;
-    document.getElementById('submitSpinner').hidden = !on;
-  }
-})();
-
-// ── Wire up buttons ───────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', function () {
-  var btn;
-
-  btn = document.getElementById('btn-start-verify');
-  if (btn) btn.addEventListener('click', function () { startVerification(); });
-
-  btn = document.getElementById('btn-open-camera');
-  if (btn) btn.addEventListener('click', function () { openCamera(); });
-
-  btn = document.getElementById('recordBtn');
-  if (btn) btn.addEventListener('click', function () { toggleRec(); });
-
-  btn = document.getElementById('btn-retake');
-  if (btn) btn.addEventListener('click', function () { retake(); });
-
-  btn = document.getElementById('submitBtn');
-  if (btn) btn.addEventListener('click', function () { submitVideo(); });
+// ── Wire all buttons after DOM ready ───────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  var b;
+  b = document.getElementById('btn-start-verify'); if (b) b.addEventListener('click', startVerification);
+  b = document.getElementById('btn-open-camera');  if (b) b.addEventListener('click', openCamera);
+  b = document.getElementById('recordBtn');        if (b) b.addEventListener('click', toggleRec);
+  b = document.getElementById('btn-retake');       if (b) b.addEventListener('click', retake);
+  b = document.getElementById('submitBtn');        if (b) b.addEventListener('click', submitVideo);
 });

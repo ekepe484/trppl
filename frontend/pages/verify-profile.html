@@ -75,31 +75,28 @@
         <video id="videoPreview" class="camera-preview" controls hidden></video>
         <div class="rec-indicator" id="recIndicator" hidden>
           <span class="rec-dot"></span> REC
+          <span id="timerVal" style="margin-left:6px;font-variant-numeric:tabular-nums">30</span>s
         </div>
-        <div class="camera-timer" id="cameraTimer" hidden>
-          <span id="timerVal">15</span>s
-        </div>
-      </div>
 
-      <!-- Action buttons -->
-      <div id="btnOpenCamera" style="padding:0 0 8px">
-      <div id="btnOpenCamera" style="padding:0 0 8px">
-        <button class="auth-btn" id="btn-open-camera">
-          <i class="ti ti-video"></i> Open camera
-        </button>
-      </div>
-      <div id="btnRecord" hidden style="padding:0 0 8px">
-        <button class="auth-btn auth-btn-red" id="recordBtn">
-          <i class="ti ti-circle"></i> Start recording
-        </button>
-      </div>
-      <div id="btnRetake" hidden style="padding:0 0 8px">
-        <div class="btn-row">
-          <button class="auth-btn auth-btn-outline" id="btn-retake" style="flex:1">Retake</button>
-          <button class="auth-btn"  id="submitBtn" style="flex:2">
-            <span id="submitLabel">Submit</span>
-            <span id="submitSpinner" class="spinner" hidden></span>
+        <!-- Buttons overlaid at the bottom of the camera view -->
+        <div id="btnOpenCamera" style="position:absolute;bottom:16px;left:16px;right:16px">
+          <button class="auth-btn" id="btn-open-camera" style="background:rgba(124,58,237,.92);backdrop-filter:blur(4px)">
+            <i class="ti ti-video"></i> Open camera
           </button>
+        </div>
+        <div id="btnRecord" hidden style="position:absolute;bottom:16px;left:16px;right:16px">
+          <button class="auth-btn auth-btn-red" id="recordBtn" style="backdrop-filter:blur(4px)">
+            <i class="ti ti-circle"></i> Start recording
+          </button>
+        </div>
+        <div id="btnRetake" hidden style="position:absolute;bottom:16px;left:16px;right:16px">
+          <div class="btn-row">
+            <button class="auth-btn auth-btn-outline" id="btn-retake" style="flex:1;background:rgba(255,255,255,.15);backdrop-filter:blur(4px);border-color:rgba(255,255,255,.4);color:#fff">Retake</button>
+            <button class="auth-btn" id="submitBtn" style="flex:2;backdrop-filter:blur(4px)">
+              <span id="submitLabel">Submit video</span>
+              <span id="submitSpinner" class="spinner" hidden></span>
+            </button>
+          </div>
         </div>
       </div>
 

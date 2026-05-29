@@ -14,12 +14,12 @@
 .vsl-txt { font-size: 14px; color: var(--tx); line-height: 1.45; padding-top: 4px; }
 
 /* ── PHRASE CARD ────────────────────────────────────────────────────────────── */
-.phrase-card { background: var(--pl); border: 2px solid var(--p); border-radius: var(--rad); padding: 16px; margin-bottom: 16px; text-align: center; min-height: 70px; display: flex; align-items: center; justify-content: center; }
-.phrase-loading { display: flex; align-items: center; gap: 10px; color: var(--pd); font-size: 13px; }
-.phrase-text { font-size: 16px; font-weight: 600; color: var(--pd); line-height: 1.5; }
+.phrase-card { background: #1a1a2e; border: 2px solid #7c3aed; border-radius: var(--rad); padding: 20px 16px; margin-bottom: 16px; text-align: center; min-height: 80px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(124,58,237,.3); }
+.phrase-loading { display: flex; align-items: center; gap: 10px; color: #a78bfa; font-size: 13px; }
+.phrase-text { font-size: 18px; font-weight: 700; color: #ffffff; line-height: 1.55; letter-spacing: 0.01em; }
 
 /* ── CAMERA ─────────────────────────────────────────────────────────────────── */
-.camera-wrap { position: relative; width: 100%; aspect-ratio: 3/4; background: #1a1a2e; border-radius: var(--rad); overflow: hidden; margin-bottom: 16px; }
+.camera-wrap { position: relative; width: 100%; aspect-ratio: 3/4; max-height: 52vh; background: #1a1a2e; border-radius: var(--rad); overflow: hidden; margin-bottom: 16px; }
 .camera-feed { width: 100%; height: 100%; object-fit: cover; display: block; transform: scaleX(-1); }
 .camera-preview { width: 100%; height: 100%; object-fit: cover; display: block; }
 .camera-overlay { position: absolute; inset: 0; pointer-events: none; display: flex; align-items: center; justify-content: center; }
