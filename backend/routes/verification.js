@@ -23,12 +23,26 @@ const uploadDir = path.resolve(config.uploads.dir,'verification');
 if(!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir,{recursive:true});
 
 const storage = multer.diskStorage({
-  destination:(_req,_file,cb)=>cb(null,uploadDir),
-  filename:(req,_file,cb)=>cb(null,`${req.user.id}-video-${uuidv4()}.webm`),
+  destination: (_req, _file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => {
+    // Detect extension from MIME type — Safari sends mp4/quicktime
+    let ext = '.webm';
+    if (file.mimetype === 'video/mp4' || file.mimetype === 'video/quicktime') ext = '.mp4';
+    else if (file.mimetype === 'video/webm') ext = '.webm';
+    else if (file.originalname) ext = path.extname(file.originalname) || '.mp4';
+    cb(null, `${req.user.id}-video-${uuidv4()}${ext}`);
+  },
 });
 const upload = multer({
-  storage,limits:{fileSize:config.uploads.maxSize},
-  fileFilter:(_req,file,cb)=>{const ok=['video/mp4','video/webm','video/quicktime','video/x-msvideo'].includes(file.mimetype);cb(ok?null:new Error('Only video files accepted.'),ok);}
+  storage,
+  limits: { fileSize: config.uploads.maxSize },
+  fileFilter: (_req, file, cb) => {
+    // Accept any video MIME type, or octet-stream (Safari sometimes sends this)
+    const isVideo = file.mimetype.startsWith('video/') ||
+                    file.mimetype === 'application/octet-stream';
+    if (isVideo) return cb(null, true);
+    cb(new Error('Only video files accepted. Got: ' + file.mimetype), false);
+  },
 });
 
 function toBase64(p){return fs.readFileSync(p).toString('base64');}
@@ -82,8 +96,9 @@ router.post('/submit', requireAuth,
   upload.single('video'),
   async(req,res,next)=>{
     try{
-      const video=req.file;
-      if(!video) return res.status(400).json({error:'Verification video is required.'});
+      const video = req.file;
+      if (!video) return res.status(400).json({ error: 'Verification video is required.' });
+      console.log(`[Verification] Received video: ${video.originalname} type=${video.mimetype} size=${video.size}`);
       await store.updateUser(req.user.id,{videoPath:video.path,verificationStatus:'processing'});
       res.json({message:'Video received. Running face verification…',status:'processing'});
 
