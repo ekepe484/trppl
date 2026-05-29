@@ -7,7 +7,12 @@ var otpMasked  = sessionStorage.getItem('otp_masked')  || otpContact;
 
 // Update header icon and subtitle
 var methodIconEl = document.getElementById('methodIcon');
-if (methodIconEl) methodIconEl.textContent = otpMethod === 'phone' ? '📱' : '📧';
+if (methodIconEl) {
+  var iconEl = methodIconEl.querySelector('i');
+  if (iconEl) iconEl.className = otpMethod === 'phone' ? 'ti ti-phone' : 'ti ti-mail';
+  iconEl.style.color = '#a78bfa';
+  iconEl.style.fontSize = '52px';
+}
 
 var otpSubEl = document.getElementById('otpSub');
 if (otpSubEl) otpSubEl.textContent = 'We sent a 6-digit code to ' + otpMasked + '. Enter it below to verify your account.';

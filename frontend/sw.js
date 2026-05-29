@@ -1,6 +1,6 @@
-const CACHE = 'trppl-v1';
-const API_CACHE = 'trppl-api-v1';
-const PRECACHE = ['/','/pages/login.html','/pages/register.html','/pages/verify-otp.html','/pages/verify-profile.html','/css/base.css','/css/components.css','/css/games.css','/css/auth.css','/css/register.css','/css/verification.css','/js/app.js','/js/auth.js','/js/audio.js','/js/sw-register.js','/js/verification.js','/js/games/chess.js','/js/games/checkers.js','/js/games/scrabble.js','/js/games/trivia.js','/manifest.json','/icons/icon-192x192.png','/icons/icon-512x512.png'];
+const CACHE = 'trppl-v3';
+const API_CACHE = 'trppl-api-v3';
+const PRECACHE = ['/','/pages/login.html','/pages/register.html','/pages/verify-otp.html','/pages/verify-profile.html','/css/base.css','/css/components.css','/css/games.css','/css/auth.css','/css/register.css','/css/verification.css','/js/app.js','/js/auth.js','/js/audio.js','/js/sw-register.js','/js/verify-otp-page.js','/js/verify-profile-page.js','/js/login-page.js','/js/register-page.js','/js/register-dropdowns.js','/js/profile-page.js','/js/games/chess.js','/js/games/checkers.js','/js/games/scrabble.js','/js/games/trivia.js','/manifest.json','/icons/icon-192x192.png','/icons/icon-512x512.png'];
 
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c=>c.addAll(PRECACHE)).then(()=>self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE&&k!==API_CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())); });
