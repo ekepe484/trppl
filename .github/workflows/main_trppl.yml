@@ -17,28 +17,35 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
       - name: Install backend dependencies
-        run: npm ci --omit=dev
+        run: npm install --omit=dev
 
-      - name: Install React dependencies and build
+      - name: Build React frontend
         run: |
           cd trppl-react
-          npm ci
+          npm install
           npm run build
           cd ..
 
-      - name: Create deployment archive
+      - name: Assemble clean deploy folder
         run: |
-          zip -r deploy.zip . \
-            --exclude "*.git*" \
-            --exclude "node_modules/*" \
-            --exclude "trppl-react/*" \
-            --exclude "android/*" \
-            --exclude "ios/*" \
-            --exclude "uploads/*" \
-            --exclude "*.zip"
+          mkdir -p deploy_pkg
+          # Backend
+          cp -r backend deploy_pkg/
+          cp -r node_modules deploy_pkg/
+          cp package.json deploy_pkg/
+          # Frontend (React build output)
+          cp -r frontend deploy_pkg/
+          # Scripts
+          cp -r scripts deploy_pkg/ 2>/dev/null || true
+
+      - name: Zip deploy folder
+        run: |
+          cd deploy_pkg
+          zip -r ../deploy.zip .
+          cd ..
+          echo "Deploy zip size: $(du -sh deploy.zip | cut -f1)"
 
       - name: Log in to Azure
         uses: azure/login@v2
