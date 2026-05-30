@@ -41,44 +41,10 @@ jobs:
         id: creds
         run: |
           USER=$(az webapp deployment list-publishing-credentials \
-            --resource-group trppl-rg \
+            --resource-group trppl \
             --name trppl-fngbaydqh3dxg0hh \
             --query publishingUserName -o tsv)
           PASS=$(az webapp deployment list-publishing-credentials \
-            --resource-group trppl-rg \
+            --resource-group trppl \
             --name trppl-fngbaydqh3dxg0hh \
             --query publishingPassword -o tsv)
-          echo "::add-mask::$PASS"
-          echo "user=$USER" >> $GITHUB_OUTPUT
-          echo "pass=$PASS" >> $GITHUB_OUTPUT
-
-      - name: Create minimal zip
-        run: |
-          zip -r deploy.zip \
-            backend/ \
-            frontend/ \
-            package.json \
-            package-lock.json \
-            scripts/
-          echo "Size: $(du -sh deploy.zip)"
-
-      - name: Upload via Kudu API
-        run: |
-          curl -X POST \
-            --fail \
-            --max-time 600 \
-            --retry 3 \
-            --retry-delay 10 \
-            -u "${{ steps.creds.outputs.user }}:${{ steps.creds.outputs.pass }}" \
-            -H "Content-Type: application/zip" \
-            --data-binary @deploy.zip \
-            "https://trppl-fngbaydqh3dxg0hh.scm.canadacentral-01.azurewebsites.net/api/zipdeploy"
-
-      - name: Restart app
-        run: |
-          az webapp restart \
-            --resource-group trppl-rg \
-            --name trppl-fngbaydqh3dxg0hh
-
-      - name: Log out
-        run: az logout
