@@ -7,3 +7,5 @@ android/
 ios/
 dist/
 trppl-react/node_modules/
+trppl-react/node_modules/
+frontend/node_modules/
