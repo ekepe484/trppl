@@ -10,16 +10,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: Install backend dependencies
-        run: npm install --omit=dev
 
       - name: Build React frontend
         run: |
@@ -28,24 +25,15 @@ jobs:
           npm run build
           cd ..
 
-      - name: Assemble clean deploy folder
+      - name: Create deploy zip (no node_modules - Azure installs them)
         run: |
-          mkdir -p deploy_pkg
-          # Backend
-          cp -r backend deploy_pkg/
-          cp -r node_modules deploy_pkg/
-          cp package.json deploy_pkg/
-          # Frontend (React build output)
-          cp -r frontend deploy_pkg/
-          # Scripts
-          cp -r scripts deploy_pkg/ 2>/dev/null || true
-
-      - name: Zip deploy folder
-        run: |
-          cd deploy_pkg
-          zip -r ../deploy.zip .
-          cd ..
-          echo "Deploy zip size: $(du -sh deploy.zip | cut -f1)"
+          zip -r deploy.zip \
+            backend/ \
+            frontend/ \
+            scripts/ \
+            package.json \
+            package-lock.json
+          echo "Zip size: $(du -sh deploy.zip | cut -f1)"
 
       - name: Log in to Azure
         uses: azure/login@v2
@@ -58,5 +46,5 @@ jobs:
           app-name: 'trppl'
           package: deploy.zip
 
-      - name: Log out of Azure
+      - name: Log out
         run: az logout
