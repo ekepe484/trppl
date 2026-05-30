@@ -4,12 +4,12 @@
   "description": "Trppl — match on love language, compete in games, win the date.",
   "main": "backend/server.js",
   "scripts": {
-    "start":    "node backend/server.js",
-    "dev":      "nodemon backend/server.js",
-    "setup-db": "node scripts/setup-db.js",
-    "cap:sync": "npx cap sync",
-    "cap:android": "npx cap open android",
-    "cap:ios":  "npx cap open ios"
+    "start":       "node backend/server.js",
+    "dev":         "nodemon backend/server.js",
+    "build":       "cd trppl-react && npm run build",
+    "build:watch": "cd trppl-react && npm run build -- --watch",
+    "dev:full":    "concurrently \"npm run dev\" \"cd trppl-react && npm run dev\"",
+    "setup-db":    "node scripts/setup-db.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.24.0",
