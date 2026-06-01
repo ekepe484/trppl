@@ -14,6 +14,7 @@ export default defineConfig({
   build: {
     outDir:      '../trppl/frontend',
     emptyOutDir: true,
+    target:      ['es2015', 'chrome80', 'firefox78', 'safari13'],
     rollupOptions: {
       output: {
         manualChunks(id) {
