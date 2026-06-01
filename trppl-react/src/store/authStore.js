@@ -25,7 +25,7 @@ export const useAuthStore = create(
       isAuthenticated: () => !!get().token,
     }),
     {
-      name:    'trppl-auth',
+      name:       'trppl-auth-v2',
       partialize: (state) => ({ token: state.token, user: state.user }),
     }
   )
