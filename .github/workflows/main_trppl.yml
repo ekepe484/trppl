@@ -18,19 +18,26 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Install backend dependencies
+        run: npm install --omit=dev
+
       - name: Build React frontend
         run: |
           cd trppl-react
           npm install
           npm run build
+          cd ..
 
-      - name: Remove unnecessary files before deploy
+      - name: Create deploy zip
         run: |
-          rm -rf trppl-react/node_modules
-          rm -rf trppl-react/.git
-          rm -rf .git
-          find . -name "*.log" -delete
-          find . -name ".DS_Store" -delete
+          zip -r deploy.zip \
+            backend/ \
+            frontend/ \
+            node_modules/ \
+            package.json \
+            package-lock.json \
+            scripts/
+          echo "Zip size: $(du -sh deploy.zip | cut -f1)"
 
       - name: Log in to Azure
         uses: azure/login@v2
@@ -41,10 +48,3 @@ jobs:
         id: creds
         run: |
           USER=$(az webapp deployment list-publishing-credentials \
-            --resource-group trppl \
-            --name trppl \
-            --query publishingUserName -o tsv)
-          PASS=$(az webapp deployment list-publishing-credentials \
-            --resource-group trppl \
-            --name trppl \
-            --query publishingPassword -o tsv)
