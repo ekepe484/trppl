@@ -42,9 +42,9 @@ jobs:
         run: |
           USER=$(az webapp deployment list-publishing-credentials \
             --resource-group trppl \
-            --name trppl-fngbaydqh3dxg0hh \
+            --name trppl \
             --query publishingUserName -o tsv)
           PASS=$(az webapp deployment list-publishing-credentials \
             --resource-group trppl \
-            --name trppl-fngbaydqh3dxg0hh \
+            --name trppl \
             --query publishingPassword -o tsv)
